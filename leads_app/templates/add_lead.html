@@ -1,228 +1,316 @@
+{% load form_filters %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Add Lead - CRM System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Add new leads to your CRM system">
 
-    <!-- Bootstrap 5 CDN -->
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome for icons -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        :root {
-            --primary-color: #4e73df;
-            --secondary-color: #f8f9fc;
-            --accent-color: #2e59d9;
-        }
-        
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
-        /* Navigation Bar Styles */
         .navbar-custom {
-            background-color: white;
+            background-color: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem 1rem;
         }
-        
         .navbar-custom .navbar-brand {
-            font-weight: 600;
-            color: var(--primary-color);
+            font-weight: bold;
+            color: #4e73df;
         }
-        
-        .user-greeting {
-            font-weight: 500;
-            margin-right: 1rem;
-            color: #495057;
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
         }
-        
-        .card {
-            border-radius: 0.5rem;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .card-header {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-        }
-        
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            padding: 0.5rem 1.5rem;
-            font-weight: 500;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-        
         .form-label {
-            font-weight: 500;
-            color: #495057;
+            font-weight: 600;
         }
-        
-        /* Improved form field styling */
-        .form-group {
-            margin-bottom: 1.5rem;
+        .products-under-service {
+            background: #f1f3f5;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
         }
-        
-        /* Animation for messages */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .btn-primary {
+            background-color: #4e73df;
+            border: none;
         }
-        
-        .alert {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        /* Responsive adjustments */
-        @media (max-width: 576px) {
-            .card-header h4 {
-                font-size: 1.25rem;
-            }
-            .user-greeting {
-                display: none;
-            }
+        .btn-primary:hover {
+            background-color: #2e59d9;
         }
     </style>
 </head>
+
 <body>
-    <!-- Navigation Header -->
-    <nav class="navbar navbar-expand-lg navbar-custom mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-address-book me-2"></i>CRM System
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <span class="user-greeting">
-                            <i class="fas fa-user-circle me-1"></i>
-                            {% if user.is_authenticated %}
-                                Welcome, {{ user.get_full_name|default:user.username }}
-                            {% endif %}
-                        </span>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'view_leads' %}" class="btn btn-outline-primary me-2">
-                            <i class="fas fa-list me-1"></i>View Leads
-                        </a>
-                    </li>
-                    <form method="POST" action="{% url 'logout' %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-sign-out-alt me-1"></i> Logout
-                        </button>
-                    </form>
-                    
-                </ul>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Main Content -->
-    <div class="container py-3">
-        <div class="row justify-content-center">
-            <div class="col-md-10 col-lg-8 col-xl-6">
-                <div class="card shadow-sm">
-                    <div class="card-header text-white text-center">
-                        <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Add New Lead</h4>
-                    </div>
-                    <div class="card-body p-4 p-md-5">
-                        {% if messages %}
-                            <div class="alert alert-success alert-dismissible fade show">
-                                {% for message in messages %}
-                                    <div><i class="fas fa-check-circle me-2"></i>{{ message }}</div>
-                                {% endfor %}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-address-book me-2"></i>CRM System
+        </a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <span class="nav-link">
+                        {% if user.is_authenticated %}
+                            Welcome, {{ user.get_full_name|default:user.username }}
                         {% endif %}
-
-                        <form method="post" novalidate class="needs-validation">
-                            {% csrf_token %}
-                            
-                            {% for field in form %}
-                            <div class="form-group mb-3">
-                                <label for="{{ field.id_for_label }}" class="form-label">
-                                    {{ field.label }}
-                                    {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
-                                </label>
-                                
-                                {{ field }}
-                                
-                                {% if field.help_text %}
-                                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                                {% endif %}
-                                
-                                {% if field.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in field.errors %}
-                                            <span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            {% endfor %}
-                            
-                            <div class="d-grid gap-3 mt-4">
-                                <button type="submit" class="btn btn-primary py-2">
-                                    <i class="fas fa-plus me-2"></i>Add Lead
-                                </button>
-                                <a href="{% url 'view_leads' %}" class="btn btn-outline-secondary py-2">
-                                    <i class="fas fa-list me-2"></i>View All Leads
-                                </a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'view_leads' %}" class="btn btn-outline-primary me-2">View Leads</a>
+                </li>
+                <li class="nav-item">
+                    <form method="POST" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Logout</button>
+                    </form>
+                </li>
+            </ul>
         </div>
     </div>
+</nav>
 
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Enable Bootstrap form validation
-        (function () {
-            'use strict'
-            
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
-            var forms = document.querySelectorAll('.needs-validation')
-            
-            // Loop over them and prevent submission
-            Array.prototype.slice.call(forms)
-                .forEach(function (form) {
-                    form.addEventListener('submit', function (event) {
-                        if (!form.checkValidity()) {
-                            event.preventDefault()
-                            event.stopPropagation()
-                        }
-                        
-                        form.classList.add('was-validated')
-                    }, false)
-                })
-        })()
-    </script>
+<!-- Main Content -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+
+            <div class="form-section">
+                <h3 class="text-center mb-4"><i class="fas fa-user-plus me-2"></i>Add New Lead</h3>
+
+                {% if messages %}
+                    <div class="alert alert-success">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post" novalidate class="needs-validation">
+                    {% csrf_token %}
+
+                    <!-- Input Fields -->
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <label for="id_name" class="form-label">
+                                Name
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div>
+                                <input type="text" name="name" maxlength="100" class="form-control" required="" id="id_name">
+                            </div>
+                        </div>
+                    
+                        <div class="col-12 mb-4">
+                            <label for="id_phone" class="form-label">
+                                Phone
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div>
+                                <input type="text" name="phone" maxlength="20" class="form-control" required="" id="id_phone">
+                            </div>
+                        </div>
+                    
+                        <div class="col-12 mb-4">
+                            <label for="id_email" class="form-label">
+                                Email
+                            </label>
+                            <div>
+                                <input type="email" name="email" maxlength="254" class="form-control" id="id_email">
+                            </div>
+                        </div>
+                    
+                        <div class="col-12 mb-4">
+                            <label for="id_shop_name" class="form-label">
+                                Shop name
+                            </label>
+                            <div>
+                                <input type="text" name="shop_name" maxlength="100" class="form-control" id="id_shop_name">
+                            </div>
+                        </div>
+                    
+                        <div class="col-12 mb-4">
+                            <label for="id_place" class="form-label">
+                                Place
+                            </label>
+                            <div>
+                                <input type="text" name="place" maxlength="100" class="form-control" id="id_place">
+                            </div>
+                        </div>
+                    
+                        <div class="col-12 mb-4">
+                            <label for="id_location" class="form-label">
+                                Location
+                            </label>
+                            <div>
+                                <input type="text" name="location" maxlength="100" class="form-control" id="id_location">
+                            </div>
+                        </div>
+                    
+                        <div class="col-12 mb-4">
+                            <label for="id_shop_type" class="form-label">
+                                Shop type
+                            </label>
+                            <div>
+                                <select name="shop_type" class="form-control" id="id_shop_type">
+                                    <option value="" selected="">---------</option>
+                                    <option value="supermarket">Supermarket</option>
+                                    <option value="saloon">Saloon</option>
+                                    <option value="restaurant">Restaurant</option>
+                                    <option value="clothing">Clothing Store</option>
+                                    <option value="electronics">Electronics Store</option>
+                                </select>
+                            </div>
+                        </div>
+                    
+                        <div class="col-12 mb-4">
+                            <label for="id_status" class="form-label">
+                                Status
+                            </label>
+                            <div>
+                                <select name="status" class="form-control" id="id_status">
+                                    <option value="" selected="">---------</option>
+                                    <option value="hot">Hot</option>
+                                    <option value="warm">Warm</option>
+                                    <option value="cold">Cold</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                            </div>
+                        </div>
+                    
+                        <div class="col-12 mb-4">
+                            <label for="id_follow_up_date" class="form-label">
+                                Follow up date
+                            </label>
+                            <div>
+                                <input type="date" name="follow_up_date" class="form-control" id="id_follow_up_date">
+                            </div>
+                        </div>
+                    
+                        <div class="col-12 mb-4">
+                            <label for="id_remarks" class="form-label">
+                                Remarks
+                            </label>
+                            <div>
+                                <textarea name="remarks" cols="40" rows="3" class="form-control" id="id_remarks"></textarea>
+                            </div>
+                        </div>
+                    
+                    </div>
+                    
+
+                    <!-- Services and Products -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Services Required</label>
+                        <div class="form-check">
+                            {% for service in form.fields.services_want.queryset %}
+                                <div class="mb-3">
+                                    <input 
+                                        type="checkbox" 
+                                        class="form-check-input service-checkbox" 
+                                        id="service-{{ service.id }}" 
+                                        name="services_want" 
+                                        value="{{ service.id }}"
+                                    >
+                                    <label class="form-check-label" for="service-{{ service.id }}">
+                                        {{ service.name }}
+                                    </label>
+
+                                    <!-- Products under this service -->
+                                    <div class="products-under-service d-none ms-4" id="products-for-{{ service.id }}">
+                                        <label class="form-label">Products Interested</label>
+                                        {% for product in service.products.all %}
+                                            <div class="form-check mb-2">
+                                                <input 
+                                                    type="checkbox" 
+                                                    class="form-check-input" 
+                                                    name="products_{{ service.id }}" 
+                                                    value="{{ product.id }}" 
+                                                    id="product-{{ product.id }}"
+                                                >
+                                                <label class="form-check-label" for="product-{{ product.id }}">
+                                                    {{ product.name }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Add Lead
+                        </button>
+                        <a href="{% url 'view_leads' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-list me-2"></i>View All Leads
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Bootstrap form validation
+(function () {
+    'use strict';
+    var forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+})();
+
+// Services -> Products Show/Hide
+document.addEventListener('DOMContentLoaded', function () {
+    const serviceCheckboxes = document.querySelectorAll('.service-checkbox');
+
+    serviceCheckboxes.forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+            const productsDiv = document.getElementById('products-for-' + checkbox.value);
+            if (productsDiv) {
+                if (checkbox.checked) {
+                    productsDiv.classList.remove('d-none');
+                } else {
+                    productsDiv.classList.add('d-none');
+                }
+            }
+        });
+
+        // Preload - show already selected
+        if (checkbox.checked) {
+            document.getElementById('products-for-' + checkbox.value).classList.remove('d-none');
+        }
+    });
+});
+</script>
+
 </body>
 </html>

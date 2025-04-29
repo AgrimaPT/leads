@@ -1,3 +1,4 @@
+{% load form_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,90 +9,252 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #4e73df;
+            --primary-light: #e6eaf8;
             --secondary-color: #f8f9fc;
             --accent-color: #2e59d9;
             --success-color: #1cc88a;
             --warning-color: #f6c23e;
             --danger-color: #e74a3b;
             --info-color: #36b9cc;
+            --text-dark: #2d3748;
+            --text-medium: #4a5568;
+            --text-light: #718096;
+            --border-color: #e2e8f0;
         }
         
         body {
             background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-medium);
         }
         
         .card {
             border: none;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border-radius: 0.75rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
         }
         
         .card-header {
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            border-radius: 0.5rem 0.5rem 0 0 !important;
-            padding: 1.5rem;
+            border-radius: 0 !important;
+            padding: 1.5rem 2rem;
+            color: white;
+            border-bottom: none;
+        }
+        
+        .card-header h4 {
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+        
+        .card-body {
+            padding: 2rem;
         }
         
         .form-section {
             background-color: white;
             border-radius: 0.5rem;
-            padding: 1.5rem;
+            padding: 1.75rem;
+            margin-bottom: 1.75rem;
+            box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+        }
+        
+        .form-section h5 {
+            color: var(--primary-color);
+            font-weight: 600;
             margin-bottom: 1.5rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--primary-light);
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-section h5 i {
+            margin-right: 0.75rem;
+            font-size: 1.1em;
         }
         
         .form-label {
-            font-weight: 600;
-            color: #6c757d;
+            font-weight: 500;
+            color: var(--text-medium);
+            margin-bottom: 0.5rem;
         }
         
         .form-control, .form-select {
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            border: 1px solid #d1d3e2;
+            padding: 0.625rem 0.875rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            color: var(--text-dark);
         }
         
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.15);
         }
         
         textarea.form-control {
             min-height: 120px;
+            resize: vertical;
         }
         
         .btn-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
         }
         
         .btn-primary:hover {
             background-color: var(--accent-color);
             border-color: var(--accent-color);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline-secondary {
+            border-radius: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-outline-secondary:hover {
+            transform: translateY(-1px);
         }
         
         .action-btn {
-            min-width: 120px;
+            min-width: 140px;
+            margin-right: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn i {
             margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
+        }
+        
+        .badge {
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+        }
+        
+        /* Service-Product specific styles */
+        .service-checkbox, .product-checkbox {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .form-check {
+            min-width: 120px;
+            background-color: var(--primary-light);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(78, 115, 223, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .form-check:hover {
+            background-color: rgba(78, 115, 223, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .form-check-input {
+            margin-top: 0.25rem;
+        }
+        
+        .form-check-label {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+        
+        .product-section {
+            margin-left: 1rem;
+            margin-top: 1.25rem;
+            padding: 1.25rem;
+            background-color: #f9fafc;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--primary-color);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .product-section h6 {
+            color: var(--primary-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .product-section h6 i {
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .form-section {
+                padding: 1.5rem;
+            }
         }
         
         @media (max-width: 768px) {
             .card-header {
-                padding: 1rem;
+                padding: 1.25rem;
+            }
+            
+            .card-body {
+                padding: 1.25rem;
             }
             
             .form-section {
-                padding: 1rem;
+                padding: 1.25rem;
+            }
+            
+            .service-checkbox, .product-checkbox {
+                gap: 0.75rem;
+            }
+            
+            .form-check {
+                min-width: 100%;
             }
             
             .action-btn {
                 width: 100%;
                 margin-right: 0;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .card-header h4 {
+                font-size: 1.25rem;
+            }
+            
+            .form-section h5 {
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -101,7 +264,7 @@
         <div class="card">
             <div class="card-header text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit Lead</h4>
+                    <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit Lead - {{ lead.name }}</h4>
                     <span class="badge bg-light text-dark">
                         <i class="fas fa-id-badge me-1"></i> ID: {{ lead.id }}
                     </span>
@@ -113,65 +276,133 @@
                     
                     <!-- Basic Information Section -->
                     <div class="form-section">
-                        <h5 class="mb-4 text-primary"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                        <h5><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="id_name" class="form-label">Name</label>
-                                {{ form.name }}
+                                <label for="id_name" class="form-label">Full Name</label>
+                                {{ form.name|add_class:"form-control" }}
+                                <div class="invalid-feedback">
+                                    Please provide a valid name.
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                <label for="id_phone" class="form-label">Phone</label>
-                                {{ form.phone }}
+                                <label for="id_phone" class="form-label">Phone Number</label>
+                                {{ form.phone|add_class:"form-control" }}
+                                <div class="invalid-feedback">
+                                    Please provide a valid phone number.
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                <label for="id_shop_name" class="form-label">Shop Name</label>
-                                {{ form.shop_name }}
+                                <label for="id_email" class="form-label">Email Address</label>
+                                {{ form.email|add_class:"form-control" }}
+                                <div class="invalid-feedback">
+                                    Please provide a valid email address.
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                <label for="id_status" class="form-label">Status</label>
-                                {{ form.status }}
+                                <label for="id_status" class="form-label">Lead Status</label>
+                                {{ form.status|add_class:"form-select" }}
                             </div>
                         </div>
                     </div>
                     
                     <!-- Business Information Section -->
                     <div class="form-section">
-                        <h5 class="mb-4 text-primary"><i class="fas fa-store me-2"></i>Business Information</h5>
+                        <h5><i class="fas fa-store me-2"></i>Business Information</h5>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="id_services_want" class="form-label">Services Required</label>
-                                {{ form.services_want }}
+                                <label for="id_shop_name" class="form-label">Business Name</label>
+                                {{ form.shop_name|add_class:"form-control" }}
                             </div>
                             <div class="col-md-6">
-                                <label for="id_shop_type" class="form-label">Shop Type</label>
-                                {{ form.shop_type }}
+                                <label for="id_shop_type" class="form-label">Business Type</label>
+                                {{ form.shop_type|add_class:"form-select" }}
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
+                                <label for="id_place" class="form-label">Area/Place</label>
+                                {{ form.place|add_class:"form-control" }}
+                            </div>
+                            <div class="col-md-6">
                                 <label for="id_location" class="form-label">Location</label>
-                                {{ form.location }}
+                                {{ form.location|add_class:"form-control" }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_follow_up_date" class="form-label">Follow-up Date</label>
+                                {{ form.follow_up_date|add_class:"form-control" }}
+                                <small class="text-muted">Format: YYYY-MM-DD</small>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Services & Products Section -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-cogs me-2"></i>Services & Products</h5>
+                        <div class="mb-4">
+                            <label class="form-label">Select Required Services</label>
+                            <div class="service-checkbox">
+                                {% for checkbox in form.services_want %}
+                                    <div class="form-check">
+                                        {{ checkbox.tag }}
+                                        <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                            {{ checkbox.choice_label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Dynamic Product Sections -->
+                        {% for service_code, products in form.SERVICE_PRODUCTS.items %}
+                            <div id="products-{{ service_code }}" class="product-section">
+                                <h6>
+                                    <i class="fas fa-cube me-2"></i>
+                                    {{ service_code|title }} Products
+                                </h6>
+                                {% with "products_"|add:service_code as field_name %}
+                                    {% with field=form|get_field:field_name %}
+                                        <div class="product-checkbox">
+                                            {% for checkbox in field %}
+                                                <div class="form-check">
+                                                    {{ checkbox.tag }}
+                                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                                        {{ checkbox.choice_label }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% if field.errors %}
+                                            <div class="invalid-feedback d-block mt-2">
+                                                {% for error in field.errors %}
+                                                    <span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endwith %}
+                            </div>
+                        {% endfor %}
                     </div>
                     
                     <!-- Remarks Section -->
                     <div class="form-section">
-                        <h5 class="mb-4 text-primary"><i class="fas fa-comment-dots me-2"></i>Remarks</h5>
+                        <h5><i class="fas fa-comment-dots me-2"></i>Additional Remarks</h5>
                         <div class="mb-3">
-                            {{ form.remarks }}
+                            <label for="id_remarks" class="form-label">Notes & Comments</label>
+                            {{ form.remarks|add_class:"form-control" }}
                         </div>
                     </div>
                     
                     <!-- Action Buttons -->
-                    <div class="d-flex flex-wrap justify-content-between mt-4 pt-3 border-top">
-                        <div>
-                            <button type="submit" class="btn btn-primary action-btn px-4">
+                    <div class="d-flex flex-wrap justify-content-between mt-4 pt-4 border-top">
+                        <div class="d-flex flex-wrap">
+                            <button type="submit" class="btn btn-primary action-btn">
                                 <i class="fas fa-save me-2"></i> Save Changes
                             </button>
                             <button type="reset" class="btn btn-outline-secondary action-btn">
                                 <i class="fas fa-undo me-1"></i> Reset
                             </button>
                         </div>
-                        <a href="{% url 'view_lead' lead.id %}" class="btn btn-secondary action-btn">
+                        <a href="{% url 'view_lead' lead.id %}" class="btn btn-outline-secondary action-btn">
                             <i class="fas fa-times me-1"></i> Cancel
                         </a>
                     </div>
@@ -183,14 +414,12 @@
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Add validation styling
+        // Form validation
         (function() {
             'use strict';
             
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
             var forms = document.querySelectorAll('.needs-validation');
             
-            // Loop over them and prevent submission
             Array.prototype.slice.call(forms)
                 .forEach(function(form) {
                     form.addEventListener('submit', function(event) {
@@ -198,11 +427,61 @@
                             event.preventDefault();
                             event.stopPropagation();
                         }
-                        
                         form.classList.add('was-validated');
                     }, false);
                 });
         })();
+
+        // Service-Product dynamic behavior
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all service checkboxes
+            const serviceCheckboxes = document.querySelectorAll('input[name="services_want"]');
+            
+            // Add event listeners to each service checkbox
+            serviceCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const serviceCode = this.value;
+                    const productSection = document.getElementById(`products-${serviceCode}`);
+                    
+                    if (this.checked) {
+                        productSection.style.display = 'block';
+                    } else {
+                        productSection.style.display = 'none';
+                        // Uncheck all products when service is unchecked
+                        const productCheckboxes = productSection.querySelectorAll('input[type="checkbox"]');
+                        productCheckboxes.forEach(pb => pb.checked = false);
+                    }
+                });
+                
+                // Initialize visibility on page load
+                const serviceCode = checkbox.value;
+                const productSection = document.getElementById(`products-${serviceCode}`);
+                if (checkbox.checked && productSection) {
+                    productSection.style.display = 'block';
+                }
+            });
+            
+            // Add animation to form sections when they come into view
+            const observerOptions = {
+                threshold: 0.1
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = "1";
+                        entry.target.style.transform = "translateY(0)";
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.style.opacity = "0";
+                section.style.transform = "translateY(20px)";
+                section.style.transition = "all 0.4s ease-out";
+                observer.observe(section);
+            });
+        });
     </script>
 </body>
 </html>
