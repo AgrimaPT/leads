@@ -353,9 +353,39 @@ from multiselectfield import MultiSelectField
 from django import forms
 from .models import Leads, Service, Product
 
+# class LeadForm(forms.ModelForm):
+#     services_want = forms.ModelMultipleChoiceField(
+#         queryset=Service.objects.all(),
+#         widget=forms.CheckboxSelectMultiple,
+#         required=False
+#     )
+    
+
+#     class Meta:
+#         model = Leads
+#         fields = ['name', 'phone', 'email', 'shop_name', 'place', 'location', 'shop_type', 'services_want', 'status', 'follow_up_date', 'remarks']
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+
+#         # Dynamically create product fields per service
+#         services = Service.objects.all()
+#         for service in services:
+#             self.fields[f'products_{service.code}'] = forms.ModelMultipleChoiceField(
+#                 queryset=Product.objects.filter(service=service),
+#                 widget=forms.CheckboxSelectMultiple,
+#                 required=False,
+#                 label=f'{service.name} Products',
+#                 initial=[]  # Avoid pre-selecting products
+#             )
+
+#         # Store services and products mapping (for template)
+#         self.SERVICE_PRODUCTS = {service.code: Product.objects.filter(service=service) for service in services}
+
+
 class LeadForm(forms.ModelForm):
     services_want = forms.ModelMultipleChoiceField(
-        queryset=Service.objects.all(),
+        queryset=Service.objects.none(),  # Placeholder for now
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
@@ -367,16 +397,22 @@ class LeadForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Set queryset at runtime (this is the fix!)
+        self.fields['services_want'].queryset = Service.objects.all()
+
         # Dynamically create product fields per service
-        services = Service.objects.all()
+        services = self.fields['services_want'].queryset
         for service in services:
-            self.fields[f'products_{service.code}'] = forms.ModelMultipleChoiceField(
+            self.fields[f'products_{service.id}'] = forms.ModelMultipleChoiceField(
                 queryset=Product.objects.filter(service=service),
                 widget=forms.CheckboxSelectMultiple,
                 required=False,
                 label=f'{service.name} Products',
-                initial=[]  # Avoid pre-selecting products
+                initial=[]
             )
 
-        # Store services and products mapping (for template)
-        self.SERVICE_PRODUCTS = {service.code: Product.objects.filter(service=service) for service in services}
+        # Store services and products mapping (for template use)
+        self.SERVICE_PRODUCTS = {
+            service.id: Product.objects.filter(service=service)
+            for service in services
+        }
