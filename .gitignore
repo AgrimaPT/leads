@@ -23,3 +23,5 @@ db.sqlite3
 # IDE configuration files
 .vscode/
 .idea/
+
+leads/settings.py
