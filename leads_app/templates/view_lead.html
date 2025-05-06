@@ -312,6 +312,17 @@
                                     {% endif %}
                                 </div>
                             </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Image</div>
+                                <div class="detail-value">
+                                    {% if lead.lead_image %}
+                                        <img src="{{ lead.lead_image.url }}" class="img-fluid rounded" style="max-height: 200px;" alt="Lead Image">
+                                    {% else %}
+                                        <span class="text-muted">No image uploaded</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
                             
                             <div class="detail-item">
                                 <div class="detail-label">Follow-up Date</div>

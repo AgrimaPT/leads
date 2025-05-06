@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2>Company Profile</h2>
+        <div class="row">
+            <div class="col-md-3 text-center">
+                {% if company.logo %}
+                    <img src="{{ company.logo.url }}" class="img-fluid rounded" style="max-height: 150px;">
+                {% else %}
+                    <div class="bg-secondary text-white p-4 rounded" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                        No Logo
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-9">
+                <p><strong>Name:</strong> {{ company.company_name }}</p>
+                <p><strong>Address:</strong> {{ company.address }}</p>
+                <p><strong>Email:</strong> {{ company.email }}</p>
+                <p><strong>Phone:</strong> {{ company.phone }}</p>
+                <p><strong>Website:</strong> <a href="{{ company.website }}" target="_blank">{{ company.website }}</a></p>
+                <p><strong>Tax Rate:</strong> {{ company.tax_rate }}%</p>
+                <a href="{% url 'edit_company_profile' %}" class="btn btn-success mt-3">Edit Profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+<div class="container mt-5 pt-5">
+    {% block title %}Company Dashboard{% endblock %}
+
+{% block content %}
+    <h2 class="mb-3">Leads</h2>
+    {% if leads %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Employee</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Shop Name</th>
+                        <th>Place</th>
+                        <th>Status</th>
+                        <th>Follow Up</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads %}
+                    <tr>
+                        <td>{{ lead.user }}</td>
+                        <td>{{ lead.name }}</td>
+                        <td>{{ lead.phone }}</td>
+                        <td>{{ lead.email }}</td>
+                        <td>{{ lead.shop_name }}</td>
+                        <td>{{ lead.place }}</td>
+                        <td>{{ lead.get_status_display }}</td>
+                        <td>{{ lead.follow_up_date }}</td>
+                        <td>{{ lead.created_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No leads available for this company.</p>
+    {% endif %}
+{% endblock %}
+
+</div>

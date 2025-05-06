@@ -97,7 +97,7 @@
                     </div>
                 {% endif %}
 
-                <form method="post" novalidate class="needs-validation">
+                <form method="post" action="{% url 'add_lead' %}" novalidate class="needs-validation" enctype="multipart/form-data">
                     {% csrf_token %}
 
                     <!-- Input Fields -->
@@ -120,6 +120,9 @@
                             <div>
                                 <input type="text" name="phone" maxlength="20" class="form-control" required="" id="id_phone">
                             </div>
+                            {% if form.phone.errors %}
+                                <div class="text-danger">{{ form.phone.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     
                         <div class="col-12 mb-4">
@@ -173,6 +176,15 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div class="col-12 mb-4">
+                            <label for="id_place" class="form-label">
+                                Photo
+                            </label>
+                            <div>
+                                {{ form.lead_image }}
+                            </div>
+                        </div>
                     
                         <div class="col-12 mb-4">
                             <label for="id_status" class="form-label">
@@ -206,10 +218,8 @@
                                 <textarea name="remarks" cols="40" rows="3" class="form-control" id="id_remarks"></textarea>
                             </div>
                         </div>
-                    
                     </div>
                     
-
                     <!-- Services and Products -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Services Required</label>

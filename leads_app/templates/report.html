@@ -1,68 +1,397 @@
+{% load form_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Leads Report</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap 5 CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Font Awesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Analytics Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #1cc88a;
+            --accent-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-bg: #f8f9fc;
+            --dark-text: #2d3748;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            color: var(--dark-text);
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), #2e59d9);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .report-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            cursor: pointer;
+            height: 100%;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1.5rem rgba(58, 59, 69, 0.2);
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .section-title {
+            position: relative;
+            padding-bottom: 10px;
+            margin: 2rem 0 1.5rem;
+            color: var(--dark-text);
+        }
+        
+        .section-title:after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }
+        
+        .status-new { background-color: var(--primary-color); }
+        .status-followup { background-color: var(--accent-color); }
+        .status-converted { background-color: var(--secondary-color); }
+        .status-lost { background-color: var(--danger-color); }
+        
+        @media (max-width: 768px) {
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
-<body class="bg-light">
-
-<div class="container py-5">
-    <div class="bg-white p-4 rounded shadow-sm">
-        <h2 class="text-primary mb-4">
-            <i class="fas fa-chart-line me-2"></i> Leads Report
-        </h2>
-
-        <form method="get" class="row g-3 align-items-end mb-4" id="dateForm">
-            <div class="col-md-4">
-                <label for="dateFilter" class="form-label">Select Follow-up Date</label>
-                <input type="date" id="dateFilter" name="follow_up_date" class="form-control"
-                       value="{{ selected_date }}">
+<body>
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-chart-line me-2"></i> Lead Analytics Dashboard</h1>
+                    <p class="mb-0">Comprehensive overview of your lead pipeline</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <span class="badge bg-light text-dark fs-6">
+                        <i class="fas fa-calendar-alt me-1"></i> 
+                        {{ current_date|date:"F j, Y" }}
+                    </span>
+                </div>
             </div>
-        </form>
+        </div>
+    </div>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-primary text-center">
-                    <tr>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>Follow-up Date</th>
-                        <th>Remarks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lead in leads %}
-                    <tr>
-                        <td>{{ lead.name }}</td>
-                        <td>{{ lead.status }}</td>
-                        <td>{{ lead.follow_up_date|date:"M d, Y" }}</td>
-                        <td>{{ lead.remarks }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">No leads found for the selected date.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="container mb-5">
+        <!-- Summary Stats Row -->
+        <div class="row mb-4">
+            <!-- <div class="col-md-3">
+                <div class="report-card" data-bs-toggle="modal" data-bs-target="#leadsModal" 
+                     data-title="All Leads" data-leads='{{ all_leads|default:"[]"|escapejs }}'>
+                    <div class="card-body">
+                        <i class="fas fa-users card-icon"></i>
+                        <div class="stat-number">{{ total_leads }}</div>
+                        <div class="stat-label">Total Leads</div>
+                    </div>
+                </div>
+            </div> -->
+            <!-- <div class="col-md-3">
+                <div class="report-card" data-bs-toggle="modal" data-bs-target="#leadsModal" 
+                     data-title="Converted Leads" data-leads='{{ leads_by_status.converted.serialized|default:"[]" }}'>
+                    <div class="card-body">
+                        <i class="fas fa-check-circle card-icon" style="color: var(--secondary-color);"></i>
+                        <div class="stat-number">{{ converted_leads }}</div>
+                        <div class="stat-label">Converted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="report-card" data-bs-toggle="modal" data-bs-target="#leadsModal" 
+                     data-title="Active Leads" data-leads='{{ leads_by_status.active.serialized|default:"[]" }}'>
+                    <div class="card-body">
+                        <i class="fas fa-bolt card-icon" style="color: var(--accent-color);"></i>
+                        <div class="stat-number">{{ active_leads }}</div>
+                        <div class="stat-label">Active</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="report-card" data-bs-toggle="modal" data-bs-target="#leadsModal" 
+                     data-title="Lost Leads" data-leads='{{ leads_by_status.lost.serialized|default:"[]" }}'>
+                    <div class="card-body">
+                        <i class="fas fa-times-circle card-icon" style="color: var(--danger-color);"></i>
+                        <div class="stat-number">{{ lost_leads }}</div>
+                        <div class="stat-label">Lost</div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+
+        <!-- Leads by Status -->
+        <h3 class="section-title"><i class="fas fa-tags me-2"></i> Leads by Status</h3>
+        <div class="row">
+            {% for status, data in leads_by_status.items %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="report-card" data-bs-toggle="modal" data-bs-target="#leadsModal" 
+                         data-title="{{ status|title }} Leads" data-leads='{{ data.serialized|default:"[]" }}'>
+                        <div class="card-body">
+                            <!-- <i class="fas {{ status|get_status_icon }} card-icon" style="color: {{ status|get_status_color }};"></i> -->
+                            <div class="stat-number">{{ data.count }}</div>
+                            <div class="stat-label">{{ status|title }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Leads by Service -->
+        <h3 class="section-title"><i class="fas fa-cogs me-2"></i> Leads by Service</h3>
+        <div class="row">
+            {% for service, data in leads_by_service.items %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="report-card" data-bs-toggle="modal" data-bs-target="#leadsModal" 
+                         data-title="{{ service.name }} Leads" data-leads='{{ data.serialized|default:"[]" }}'>
+                        <div class="card-body">
+                            <!-- <i class="fas fa-{{ service.icon|default:"cog" }} card-icon"></i> -->
+                            <div class="stat-number">{{ data.count }}</div>
+                            <div class="stat-label">{{ service.name }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Leads by Product -->
+        <h3 class="section-title"><i class="fas fa-cube me-2"></i> Leads by Product</h3>
+        <div class="row">
+            {% for product, data in leads_by_product.items %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="report-card" data-bs-toggle="modal" data-bs-target="#leadsModal" 
+                         data-title="{{ product.name }} Leads" data-leads='{{ data.serialized|default:"[]" }}'>
+                        <div class="card-body">
+                            <!-- <i class="fas fa-{{ product.icon|default:"cube" }} card-icon"></i> -->
+                            <div class="stat-number">{{ data.count }}</div>
+                            <div class="stat-label">{{ product.name }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Previous code remains the same until the modal section -->
+
+<!-- Leads Modal -->
+<div class="modal fade" id="leadsModal" tabindex="-1" aria-labelledby="leadsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="leadsModalLabel">Leads Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>Shop/Company</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Follow Up</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalLeadsBody">
+                            <!-- Leads will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="me-auto">
+                    <span id="leadsCount" class="badge bg-primary">0 leads</span>
+                </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-download me-1"></i> Export
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Auto-submit script -->
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.getElementById("dateFilter").addEventListener("change", function () {
-        document.getElementById("dateForm").submit();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the modal
+        const leadsModal = document.getElementById('leadsModal');
+        if (leadsModal) {
+            leadsModal.addEventListener('show.bs.modal', function(event) {
+                // Button that triggered the modal
+                const button = event.relatedTarget;
+                
+                // Extract info from data-* attributes
+                const title = button.getAttribute('data-title');
+                const leadsData = JSON.parse(button.getAttribute('data-leads'));
+                
+                // Update the modal's content
+                const modalTitle = leadsModal.querySelector('.modal-title');
+                modalTitle.textContent = title;
+                
+                // Update leads count
+                const leadsCount = leadsModal.querySelector('#leadsCount');
+                leadsCount.textContent = `${leadsData.length} leads`;
+                
+                // Populate the leads table
+                const modalBody = document.getElementById('modalLeadsBody');
+                modalBody.innerHTML = '';
+                
+                leadsData.forEach(leadData => {
+                    const lead = leadData.fields; // Access the fields from serialized data
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>
+                            <strong>${lead.name || 'N/A'}</strong>
+                            ${lead.email ? `<div class="small text-muted">${lead.email}</div>` : ''}
+                        </td>
+                        <td>
+                            <i class="fas fa-phone me-1"></i> ${lead.phone || 'N/A'}
+                            ${lead.alt_phone ? `<div class="small text-muted"><i class="fas fa-phone-alt me-1"></i> ${lead.alt_phone}</div>` : ''}
+                        </td>
+                        <td>${lead.shop_name || lead.company || 'N/A'}</td>
+                        <td>${lead.place || lead.location || 'N/A'}</td>
+                        <td>
+                            <span class="status-badge rounded-pill ${getStatusClass(lead.status)}">
+                                ${lead.status || 'N/A'}
+                            </span>
+                        </td>
+                        <td>${lead.follow_up_date ? formatDate(lead.follow_up_date) : 'Not set'}</td>
+                        <td>
+                            <a href="/leads/${leadData.pk}/" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="/leads/${leadData.pk}/edit/" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    `;
+                    modalBody.appendChild(row);
+                });
+            });
+        }
+        
+        // Helper function to get status class
+        function getStatusClass(status) {
+            if (!status) return 'status-new';
+            const statusLower = status.toLowerCase();
+            if (statusLower.includes('new')) return 'status-new';
+            if (statusLower.includes('follow')) return 'status-followup';
+            if (statusLower.includes('convert')) return 'status-converted';
+            if (statusLower.includes('lost')) return 'status-lost';
+            return 'status-new';
+        }
+        
+        // Helper function to format date
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                return dateString; // Return as-is if can't parse
+            }
+        }
+        
+        // Add animation to cards when they come into view
+        const observerOptions = {
+            threshold: 0.1
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = "1";
+                    entry.target.style.transform = "translateY(0)";
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.report-card').forEach(card => {
+            card.style.opacity = "0";
+            card.style.transform = "translateY(20px)";
+            card.style.transition = "all 0.4s ease-out";
+            observer.observe(card);
+        });
     });
 </script>
-
 </body>
 </html>
