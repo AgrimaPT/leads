@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -299,7 +300,15 @@
     <nav class="navbar navbar-expand navbar-light d-lg-none">
         <div class="container-fluid justify-content-end">
             <div class="user-profile">
-                <img src="{{ company.logo.url }}" alt="User">
+                
+                <!-- {% if company.logo %}
+                    <img src="{{ company.logo.url }}" alt="{{ company.company_name }} Logo">
+                {% else %}
+                    <img src="{% static 'images/150-1503945_transparent-user-png-default-user-image-png-png.png' %}" alt="Default Logo">
+                {% endif %} -->
+
+
+            
                 <div class="user-info">
                     <strong>Admin</strong>
                     <small>Company</small>
