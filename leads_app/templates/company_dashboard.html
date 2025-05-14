@@ -4,42 +4,210 @@
 
 {% block content %}
     <h2 class="mb-3">Leads</h2>
-    {% if leads %}
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Employee</th>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                        <th>Shop Name</th>
-                        <th>Place</th>
-                        <th>Status</th>
-                        <th>Follow Up</th>
-                        <th>Created At</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lead in leads %}
-                    <tr>
-                        <td>{{ lead.user }}</td>
-                        <td>{{ lead.name }}</td>
-                        <td>{{ lead.phone }}</td>
-                        <td>{{ lead.email }}</td>
-                        <td>{{ lead.shop_name }}</td>
-                        <td>{{ lead.place }}</td>
-                        <td>{{ lead.get_status_display }}</td>
-                        <td>{{ lead.follow_up_date }}</td>
-                        <td>{{ lead.created_at|date:"Y-m-d H:i" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search leads..." onkeyup="searchLeads()">
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h4 class="m-0 font-weight-bold text-primary"><i class="fas fa-list me-2"></i>Leads List</h4>
+            <div>
+                
+                <a href="{% url 'download_leads_excel' %}" class="btn btn-success btn-sm">
+                    <i class="fas fa-download me-1"></i> Download Excel
+                </a>
+            </div>
         </div>
-    {% else %}
-        <p>No leads available for this company.</p>
-    {% endif %}
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="leadsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                          <th rowspan="2">Employee</th>
+                          <th rowspan="2">Name</th>
+                          <th rowspan="2">Phone</th>
+                          <th rowspan="2">Email</th>
+                          <th rowspan="2">Shop Name</th>
+                          <th rowspan="2">Place</th>
+                          <th rowspan="2">Location</th>
+                          <th rowspan="2">Type</th>
+                          <th rowspan="2">Status</th>
+                          <th colspan="2" class="text-center">Services and Products</th>
+                          <th rowspan="2">Follow-up</th>
+                          <th rowspan="2">Remarks</th>
+                          <!-- <th rowspan="2">Actions</th> -->
+                        </tr>
+                        <tr>
+                          <th>Service</th>
+                          <th>Product</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lead in leads %}
+                            {% with lead.services_with_products as services %}
+                            {% with services|length as service_count %}
+                                {% if service_count > 0 %}
+                                    {% for service in services %}
+                                        <tr class="lead-row" data-lead-id="{{ lead.id }}">
+                                            {% if forloop.first %}
+                                            <td rowspan="{{ service_count }}" class="lead-info">{{ lead.user }}</td>
+                                                <td rowspan="{{ service_count }}" class="lead-info">{{ lead.name }}</td>
+                                                <td rowspan="{{ service_count }}" class="lead-info">
+                                                    <a href="tel:{{ lead.phone }}">{{ lead.phone }}</a>
+                                                </td>
+                                                <td rowspan="{{ service_count }}" class="lead-info">{{ lead.email }}</td>
+                                                <td rowspan="{{ service_count }}" class="lead-info">{{ lead.shop_name }}</td>
+                                                <td rowspan="{{ service_count }}" class="lead-info">{{ lead.place }}</td>
+                                                <td rowspan="{{ service_count }}" class="lead-info">
+                                                    <a href="https://www.google.com/maps/search/?api=1&query={{ lead.location|urlencode }}" target="_blank">
+                                                        {{ lead.location }}
+                                                    </a>
+                                                </td>
+                                                <td rowspan="{{ service_count }}" class="lead-info">{{ lead.shop_type }}</td>
+                                                <td rowspan="{{ service_count }}" class="lead-info">
+                                                    {% if lead.status == 'New' %}
+                                                        <span class="status-badge badge-new">{{ lead.status }}</span>
+                                                    {% elif lead.status == 'Follow Up' %}
+                                                        <span class="status-badge badge-followup">{{ lead.status }}</span>
+                                                    {% elif lead.status == 'Converted' %}
+                                                        <span class="status-badge badge-converted">{{ lead.status }}</span>
+                                                    {% elif lead.status == 'Lost' %}
+                                                        <span class="status-badge badge-lost">{{ lead.status }}</span>
+                                                    {% else %}
+                                                        {{ lead.status }}
+                                                    {% endif %}
+                                                </td>
+                                            {% endif %}
+                                            
+                                            <td class="service-row">{{ service.name }}</td>
+                                            <td class="service-row">{{ service.product }}</td>
+                            
+                                            {% if forloop.first %}
+                                                <td rowspan="{{ service_count }}" class="lead-info">
+                                                    {% if lead.follow_up_date %}
+                                                        {% if lead.follow_up_date < today %}
+                                                            <span class="text-danger fw-bold">{{ lead.follow_up_date|date:"M d, Y" }}</span>
+                                                        {% elif lead.follow_up_date == today %}
+                                                            <span class="text-warning fw-bold">{{ lead.follow_up_date|date:"M d, Y" }}</span>
+                                                        {% else %}
+                                                            {{ lead.follow_up_date|date:"M d, Y" }}
+                                                        {% endif %}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td rowspan="{{ service_count }}" class="lead-info">{{ lead.remarks|truncatechars:30|default:"-" }}</td>
+                                                
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr class="lead-row" data-lead-id="{{ lead.id }}">
+                                        <td class="lead-info">{{ lead.name }}</td>
+                                        <td class="lead-info">
+                                            <a href="tel:{{ lead.phone }}">{{ lead.phone }}</a>
+                                        </td>
+                                        <td class="lead-info">{{ lead.email }}</td>
+                                        <td class="lead-info">{{ lead.shop_name }}</td>
+                                        <td class="lead-info">{{ lead.place }}</td>
+                                        <td class="lead-info">
+                                            <a href="https://www.google.com/maps/search/?api=1&query={{ lead.location|urlencode }}" target="_blank">
+                                                {{ lead.location }}
+                                            </a>
+                                        </td>
+                                        <td class="lead-info">{{ lead.shop_type }}</td>
+                                        <td class="lead-info">
+                                            {% if lead.status == 'New' %}
+                                                <span class="status-badge badge-new">{{ lead.status }}</span>
+                                            {% elif lead.status == 'Follow Up' %}
+                                                <span class="status-badge badge-followup">{{ lead.status }}</span>
+                                            {% elif lead.status == 'Converted' %}
+                                                <span class="status-badge badge-converted">{{ lead.status }}</span>
+                                            {% elif lead.status == 'Lost' %}
+                                                <span class="status-badge badge-lost">{{ lead.status }}</span>
+                                            {% else %}
+                                                {{ lead.status }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="empty-service">No service selected</td>
+                                        <td class="empty-service">-</td>
+                                        <td class="lead-info">
+                                            {% if lead.follow_up_date %}
+                                                {% if lead.follow_up_date < today %}
+                                                    <span class="text-danger fw-bold">{{ lead.follow_up_date|date:"M d, Y" }}</span>
+                                                {% elif lead.follow_up_date == today %}
+                                                    <span class="text-warning fw-bold">{{ lead.follow_up_date|date:"M d, Y" }}</span>
+                                                {% else %}
+                                                    {{ lead.follow_up_date|date:"M d, Y" }}
+                                                {% endif %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td class="lead-info">{{ lead.remarks|truncatechars:30|default:"-" }}</td>
+                                        
+                                    </tr>
+                                {% endif %}
+                            {% endwith %}
+                            {% endwith %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="13" class="text-center">No leads found</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+<script>
+    function searchLeads() {
+        const query = document.getElementById("searchInput").value.toLowerCase();
+        const rows = document.querySelectorAll("#leadsTable tbody tr");
+        
+        // First hide all rows
+        rows.forEach(row => {
+            row.style.display = "none";
+        });
+        
+        // Find all matching rows and their lead IDs
+        const matchingLeadIds = new Set();
+        rows.forEach(row => {
+            if (row.querySelector('td[colspan="13"]')) return;
+            
+            const cells = row.querySelectorAll("td");
+            let match = false;
+            
+            cells.forEach(cell => {
+                if (cell.textContent.toLowerCase().includes(query)) {
+                    match = true;
+                }
+            });
+            
+            if (match) {
+                const leadId = row.getAttribute("data-lead-id");
+                matchingLeadIds.add(leadId);
+            }
+        });
+        
+        // Show all rows for matching leads
+        rows.forEach(row => {
+            const leadId = row.getAttribute("data-lead-id");
+            if (matchingLeadIds.has(leadId)) {
+                row.style.display = "";
+            } else if (row.querySelector('td[colspan="13"]')) {
+                // Handle "No leads found" row
+                const hasMatches = matchingLeadIds.size > 0;
+                row.style.display = hasMatches ? "none" : "";
+            }
+        });
+    }
+</script>
 {% endblock %}
 
 </div>

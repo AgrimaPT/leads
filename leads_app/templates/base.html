@@ -239,6 +239,36 @@
             background-color: var(--secondary-color);
             border-color: var(--secondary-color);
         }
+
+        .logout-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    width: 100%;
+    color: rgba(255, 255, 255, 0.8);
+    background: none;
+    border: none;
+    text-align: left;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-size: 1rem;
+}
+
+.logout-link i {
+    margin-right: 12px;
+    font-size: 1.1rem;
+    width: 24px;
+    text-align: center;
+}
+
+.logout-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(5px);
+    cursor: pointer;
+}
+
     </style>
 </head>
 <body>
@@ -257,43 +287,38 @@
             <h3><i class="bi bi-columns-gap"></i> </h3>
         </div>
         
-        <a href="{% url 'view_company_profile' %}" class="active">
+        <a href="{% url 'view_company_profile' username=user.username %}" class="active">
             <i class="bi bi-building"></i> Company Profile
         </a>
 
-        <a href="{% url 'company_dashboard' %}">
+        <a href="{% url 'company_dashboard' username=user.username %}">
             <i class="bi bi-plus-circle"></i> Leads
         </a>
         
-        <!-- <a href="{% url 'add_service' %}">
-            <i class="bi bi-plus-circle"></i> Add Service
-        </a> -->
         
-        <!-- <a href="{% url 'add_product' %}">
-            <i class="bi bi-box-seam"></i> Add Product
-        </a> -->
 
-        <a href="{% url 'service_product_list' %}">
+        <a href="{% url 'service_product_list' username=user.username %}">
             <i class="bi bi-box-seam"></i> Service & Product
         </a>
 
-        <a href="{% url 'employee_leads' %}">
+        <a href="{% url 'employee_leads' username=user.username %}">
             <i class="bi bi-collection"></i> Employees
         </a>
+
+        <form method="POST" action="{% url 'logout' %}" style="margin: 5px 15px;">
+            {% csrf_token %}
+            <button type="submit" class="logout-link">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </form>
         
-        <!-- <a href="{% url 'service_product_list' %}">
-            <i class="bi bi-collection"></i> Inventory
-        </a> -->
+        
+        
+        
+        
         
         <div class="divider"></div>
-<!--         
-        <a href="#">
-            <i class="bi bi-gear"></i> Settings
-        </a>
-        
-        <a href="#">
-            <i class="bi bi-question-circle"></i> Help
-        </a> -->
+
     </div>
 
     <!-- Top Navbar -->
@@ -329,55 +354,14 @@
         {% block content %}
         <!-- Default content can go here -->
         <div class="row">
-            <!-- <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span>Services</span>
-                        <span class="badge bg-primary">24 Active</span>
-                    </div>
-                    <div class="card-body">
-                        <p>Manage your company's services, add new offerings, and update existing ones.</p>
-                        <a href="{% url 'add_service' %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-plus"></i> Add Service
-                        </a>
-                    </div>
-                </div>
-            </div> -->
-            
-            <!-- <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span>Products</span>
-                        <span class="badge bg-success">42 Items</span>
-                    </div>
-                    <div class="card-body">
-                        <p>Track your product inventory, add new items, and manage stock levels.</p>
-                        <a href="{% url 'add_product' %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-plus"></i> Add Product
-                        </a>
-                    </div>
-                </div>
-            </div> -->
             
             
-            <!-- <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <span>Quick Actions</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'service_product_list' %}" class="btn btn-outline-primary">
-                                <i class="bi bi-table"></i> View Inventory
-                            </a>
-                            <a href="{% url 'view_company_profile' %}" class="btn btn-outline-secondary">
-                                <i class="bi bi-building"></i> Company Profile
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
+            
+            
+            
+            
+            
+        
         {% endblock %}
     </div>
 

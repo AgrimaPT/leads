@@ -119,7 +119,7 @@
                 <h5 class="modal-title" id="addServiceModalLabel">Add New Service</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{% url 'add_service' %}">
+            <form method="post" action="{% url 'add_service' request.user.username %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
@@ -155,12 +155,16 @@
                 <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{% url 'add_product' %}">
+            <form method="post" action="{% url 'add_product' request.user.username %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Product Name</label>
                         <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Picture</label>
+                        <input type="file" class="form-control" name="photo" >
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Price</label>
@@ -196,23 +200,12 @@
                 <h5 class="modal-title">Edit Service</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{% url 'edit_service' service.id %}">
+            <form method="post" action="{% url 'edit_service' username=request.user.username pk=service.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Service Name</label>
                         <input type="text" class="form-control" name="name" value="{{ service.name }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" name="description" rows="3">{{ service.description }}</textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Price</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₹</span>
-                            <input type="number" class="form-control" name="price" value="{{ service.price }}" step="0.01">
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -235,12 +228,24 @@
                     <h5 class="modal-title">Edit Product</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="post" action="{% url 'edit_product' product.id %}">
+                <form method="post" action="{% url 'edit_product' username=request.user.username pk=product.id %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Product Name</label>
                             <input type="text" class="form-control" name="name" value="{{ product.name }}" required>
+                        </div>
+                        {% if product.photo %}
+                            <div class="mb-3">
+                                <label class="form-label">Current Image:</label><br>
+                                <img src="{{ product.photo.url }}" alt="{{ product.name }}" class="img-thumbnail" width="100">
+                            </div>
+                        {% endif %}
+
+                        <!-- New Upload -->
+                        <div class="mb-3">
+                            <label class="form-label">Change Image</label>
+                            <input type="file" name="photo" class="form-control">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Price</label>
@@ -288,7 +293,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form method="POST" action="{% url 'delete_service' service.id %}">
+                <form method="POST" action="{% url 'delete_service' request.user.username service.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>

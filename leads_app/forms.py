@@ -1,7 +1,7 @@
 
 
 from django import forms
-from .models import Leads,Service,Product,CompanyProfile
+from .models import Leads,Service,Product,CompanyProfile,Employee
 from multiselectfield import MultiSelectField
 from django.contrib.auth.models import User
 
@@ -269,9 +269,14 @@ class CompanyProfileForm(forms.ModelForm):
         model = CompanyProfile
         fields = ['company_name', 'logo', 'address', 'email', 'phone', 'website', 'tax_rate']
         widgets = {
-            'address': forms.Textarea(attrs={'rows': 3}),
+            'company_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'website': forms.URLInput(attrs={'class': 'form-control'}),
+            'tax_rate': forms.NumberInput(attrs={'class': 'form-control'}),
         }
-
+    
 
 class ServiceForm(forms.ModelForm):
     class Meta:
@@ -281,4 +286,9 @@ class ServiceForm(forms.ModelForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['service', 'name', 'code', 'price']
+        fields = ['service', 'name', 'code', 'price','photo']
+
+class EmployeeProfileForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = ['name','email','phone', 'profile_pic'] 

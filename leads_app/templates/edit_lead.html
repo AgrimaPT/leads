@@ -432,6 +432,12 @@
                                         <label class="form-check-label" for="product_{{ product.id }}">
                                             {{ product.name }}
                                         </label>
+                                        <input type="number"
+                                            name="quantity_{{ service.id }}_{{ product.id }}"
+                                            min="1"
+                                            class="form-control form-control-sm d-inline-block ms-2"
+                                            style="width: 80px; display: inline;"
+                                            value="{% for p in lead.leadproduct_set.all %}{% if p.product_id == product.id %}{{ p.quantity }}{% endif %}{% endfor %}">
                                     </div>
                                 {% endfor %}
                             </div>
@@ -459,7 +465,7 @@
                                 <i class="fas fa-undo me-1"></i> Reset
                             </button>
                         </div>
-                        <a href="{% url 'view_lead' lead.id %}" class="btn btn-outline-secondary action-btn">
+                        <a href="{% url 'view_lead' pk=lead.id username=request.user.username %}" class="btn btn-outline-secondary action-btn">
                             <i class="fas fa-times me-1"></i> Cancel
                         </a>
                     </div>
@@ -467,7 +473,7 @@
             </div>
         </div>
     </div>
-    <p>Initial services: {{ form.initial_services }}</p>
+    
 
 
     <!-- Bootstrap JS Bundle with Popper -->

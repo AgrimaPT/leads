@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Profile | {{ request.user.username }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .edit-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: none;
+        }
+        .edit-header {
+            border-radius: 10px 10px 0 0 !important;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .form-control, .form-select {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            transition: all 0.3s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #3a7bd5;
+            box-shadow: 0 0 0 0.25rem rgba(58, 123, 213, 0.25);
+        }
+        .btn-save {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .profile-pic-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 1.5rem;
+        }
+        .profile-pic-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .profile-pic-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #3a7bd5;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .profile-pic-upload input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="edit-card card mx-auto" style="max-width: 600px;">
+            <div class="edit-header card-header text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0 fw-bold"><i class="fas fa-user-edit me-2"></i>Edit Profile</h4>
+                        <small class="opacity-75">Update your personal information</small>
+                    </div>
+                    <a href="{% url 'employee_profile' username=request.user.username %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Profile Picture Field -->
+                    <div class="text-center mb-4">
+                        <div class="profile-pic-container">
+                            {% if form.instance.profile_pic %}
+                                <img id="profile-pic-preview" src="{{ form.instance.profile_pic.url }}" class="profile-pic-preview">
+                            {% else %}
+                                <div id="profile-pic-preview" class="profile-pic-preview bg-light d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-user fa-3x text-secondary"></i>
+                                </div>
+                            {% endif %}
+                            <label class="profile-pic-upload" for="id_profile_pic">
+                                <i class="fas fa-camera"></i>
+                                {{ form.profile_pic }}
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Fields -->
+                    {% for field in form %}
+                        {% if field.name != 'profile_pic' %}
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}" class="form-label">
+                                    <i class="fas fa-{% if field.name == 'name' %}user{% elif field.name == 'email' %}envelope{% elif field.name == 'phone' %}phone{% else %}info-circle{% endif %} me-1"></i>
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="submit" class="btn btn-primary btn-save">
+                            <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                        <a href="{% url 'employee_profile' username=request.user.username %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Preview profile picture when selected -->
+    <script>
+        document.getElementById('id_profile_pic').addEventListener('change', function(event) {
+            const [file] = event.target.files;
+            if (file) {
+                const preview = document.getElementById('profile-pic-preview');
+                if (preview.tagName === 'IMG') {
+                    preview.src = URL.createObjectURL(file);
+                } else {
+                    // Replace the div with an img element
+                    const newPreview = document.createElement('img');
+                    newPreview.id = 'profile-pic-preview';
+                    newPreview.className = 'profile-pic-preview';
+                    newPreview.src = URL.createObjectURL(file);
+                    preview.parentNode.replaceChild(newPreview, preview);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
