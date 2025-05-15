@@ -287,6 +287,10 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['service', 'name', 'code', 'price','photo']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['price'].required = False
 
 class EmployeeProfileForm(forms.ModelForm):
     class Meta:

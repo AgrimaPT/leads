@@ -72,7 +72,7 @@ class Product(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=100)
     code = models.SlugField(unique=True,blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
     photo = models.ImageField(upload_to='product_photos/', blank=True, null=True)  # New photo field
 
     def save(self, *args, **kwargs):

@@ -639,7 +639,7 @@ def add_product(request,username):
     if request.user.username != username:
         return redirect('home_selection_view')
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
+        form = ProductForm(request.POST or None, request.FILES or None)
         if form.is_valid():
             form.save()
             return redirect('service_product_list', username=username)

@@ -162,6 +162,15 @@
             background-color: white;
             padding: 0 1rem;
         }
+
+        input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-textfield-decoration-container {
+    display: none;
+}
+
+
         
         @media (max-width: 576px) {
             .login-card {
@@ -215,7 +224,9 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                     <input type="password" class="form-control" id="employeePassword" name="password"  required>
-                                    
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleEmployeePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                 </div>
                             </div>
                             <!-- <div class="mb-3 form-check">
@@ -256,9 +267,9 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                     <input type="password" class="form-control" id="companyPassword" name="password"  required>
-                                    <!-- <button class="btn btn-outline-secondary" type="button" id="toggleCompanyPassword">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleCompanyPassword">
                                         <i class="fas fa-eye"></i>
-                                    </button> -->
+                                    </button>
                                 </div>
                             </div>
                             <!-- <div class="mb-3 form-check">

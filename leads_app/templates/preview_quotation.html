@@ -122,7 +122,9 @@
 
         <!-- Header -->
         <div class="header">
-            <img src="{{ company.logo.url }}" alt="Company Logo"><br>
+            {% if company.logo %}
+                <img src="{{ company.logo.url }}" alt="Company Logo"><br>
+            {% endif %}
             <strong>{{company.user}}</strong><br>
             {{company.address}}<br>
             Phone: {{company.phone}} | Email:{{company.email}} | Website:{{company.website}}
