@@ -51,8 +51,8 @@ def login_view(request):
         return redirect(reverse('view_leads', kwargs={'username': request.user.username}))
   # Change redirect as needed
 
-    return render(request, 'registration/login.html', {'form': form})
-
+    return render(request, 'registration/home_selection.html', {'form': form})
+    
 @login_required
 def delete_lead(request, pk,username):
     if request.user.username != username:
@@ -496,7 +496,7 @@ def company_login_view(request):
     for field in form.fields.values():
         field.widget.attrs['class'] = 'form-control'
 
-    return render(request, 'registration/company_login.html', {'form': form})
+    return render(request, 'registration/home_selection.html', {'form': form})
 
 def company_signup(request):
     if request.method == 'POST':
