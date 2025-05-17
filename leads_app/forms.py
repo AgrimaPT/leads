@@ -267,7 +267,7 @@ class LeadForm(forms.ModelForm):
 class CompanyProfileForm(forms.ModelForm):
     class Meta:
         model = CompanyProfile
-        fields = ['company_name', 'logo', 'address', 'email', 'phone', 'website', 'tax_rate']
+        fields = ['company_name', 'logo', 'address', 'email', 'phone', 'website', 'tax_rate','q_coverpage']
         widgets = {
             'company_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),

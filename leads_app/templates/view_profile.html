@@ -36,6 +36,7 @@
                             </div>
                         </div>
                         
+                        
                         <div class="col-md-8">
                             <div class="table-responsive">
                                 <table class="table table-sm table-borderless mb-0">
@@ -69,12 +70,21 @@
                                                 </a>
                                             </td>
                                         </tr>
-                                        <tr>
+                                        <tr class="border-bottom">
                                             <th scope="row" class="ps-0 py-2">Tax Identification</th>
                                             <td class="py-2">{{ company.tax_rate }}% </td>
                                         </tr>
+                                        <tr>
+                                            <th scope="row" class="ps-0 py-2">Quotation Cover Page</th>
+                                            <td class="py-2">
+                                                {% if company.q_coverpage %}
+                                                    <img src="{{ company.q_coverpage.url }}" class="img-fluid rounded" style="max-height: 50px; width: auto;">
+                                                {% endif %}
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
+                                
                             </div>
                         </div>
                     </div>

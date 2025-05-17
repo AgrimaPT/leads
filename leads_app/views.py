@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect,get_object_or_404
 from .forms import LeadForm,CompanySignupForm,CompanyProfileForm,ServiceForm,ProductForm
-from .models import Leads,Product,Service,CompanyProfile,LeadProduct
+from .models import Leads,Product,Service,CompanyProfile,LeadProduct,Employee
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 from django.contrib.auth import login
@@ -31,28 +31,49 @@ def signup_view(request):
 
 
 from .models import CompanyProfile, Employee
-
-
-
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            # Check if user is an employee
+            if Employee.objects.filter(user=user).exists():
+                login(request, user)
+                return redirect(reverse('view_leads', kwargs={'username': user.username}))
+            else:
+                messages.error(request, 'You are not authorized as an employee user.')
+        else:
+            messages.error(request, 'Invalid username or password.')
     else:
         form = AuthenticationForm()
 
     # Apply Bootstrap styling
     for field in form.fields.values():
-        existing_classes = field.widget.attrs.get('class', '')
-        field.widget.attrs['class'] = f'{existing_classes} form-control'.strip()
-
-    if request.method == 'POST' and form.is_valid():
-        user = form.get_user()
-        login(request, user)
-        return redirect(reverse('view_leads', kwargs={'username': request.user.username}))
-  # Change redirect as needed
+        field.widget.attrs['class'] = 'form-control'
 
     return render(request, 'registration/home_selection.html', {'form': form})
-    
+
+
+# def login_view(request):
+#     if request.method == 'POST':
+#         form = AuthenticationForm(request, data=request.POST)
+#     else:
+#         form = AuthenticationForm()
+
+#     # Apply Bootstrap styling
+#     for field in form.fields.values():
+#         existing_classes = field.widget.attrs.get('class', '')
+#         field.widget.attrs['class'] = f'{existing_classes} form-control'.strip()
+
+#     if request.method == 'POST' and form.is_valid():
+#         user = form.get_user()
+#         if Employee.objects.filter(user=user).exists():
+#             login(request, user)
+#             return redirect(reverse('view_leads', kwargs={'username': request.user.username}))
+  
+#     return render(request, 'registration/home_selection.html', {'form': form})
+ 
+
 @login_required
 def delete_lead(request, pk,username):
     if request.user.username != username:
@@ -72,8 +93,6 @@ def check_phone_exists(request):
     if phone:
         exists = Leads.objects.filter(phone=phone).exists()
     return JsonResponse({'exists': exists})
-
-
 
 
 @login_required
@@ -489,6 +508,8 @@ def company_login_view(request):
                 return redirect('company_dashboard',username=user.username)
             else:
                 messages.error(request, 'You are not authorized as a company user.')
+        else:
+            messages.error(request, 'Invalid username or password.')
     else:
         form = AuthenticationForm()
 

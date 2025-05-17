@@ -77,6 +77,10 @@
         .profile-pic-upload input {
             display: none;
         }
+        #id_profile_pic {
+            display: none;
+        }
+
     </style>
 </head>
 <body>
@@ -110,9 +114,10 @@
                             {% endif %}
                             <label class="profile-pic-upload" for="id_profile_pic">
                                 <i class="fas fa-camera"></i>
-                                {{ form.profile_pic }}
                             </label>
+                            <input type="file" name="profile_pic" id="id_profile_pic" accept="image/*">
                         </div>
+                        
                     </div>
                     
                     <!-- Form Fields -->

@@ -13,6 +13,7 @@ class CompanyProfile(models.Model):
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     website = models.URLField(blank=True, null=True)
+    q_coverpage=models.ImageField(upload_to='cover_pages/', blank=True, null=True)
     tax_rate = models.DecimalField(
         max_digits=5, 
         decimal_places=2, 
