@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+{% load static %}
+{% load form_filters %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #4e73df;
+        --primary-light: #e6eaf8;
+        --secondary-color: #f8f9fc;
+        --accent-color: #2e59d9;
+        --success-color: #1cc88a;
+        --warning-color: #f6c23e;
+        --danger-color: #e74a3b;
+        --info-color: #36b9cc;
+        --text-dark: #2d3748;
+        --text-medium: #4a5568;
+        --text-light: #718096;
+        --border-color: #e2e8f0;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        border-radius: 0 !important;
+        padding: 1.5rem 2rem;
+        color: white;
+        border-bottom: none;
+    }
+    
+    .card-header h4 {
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+    
+    .card-body {
+        padding: 2rem;
+    }
+    
+    .form-section {
+        background-color: white;
+        border-radius: 0.5rem;
+        padding: 1.75rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.03);
+        border: 1px solid var(--border-color);
+    }
+    
+    .form-section h5 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary-light);
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-section h5 i {
+        margin-right: 0.75rem;
+        font-size: 1.1em;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: var(--text-medium);
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        padding: 0.625rem 0.875rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        color: var(--text-dark);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.15);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        font-weight: 500;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        transform: translateY(-1px);
+    }
+    
+    .btn-outline-secondary {
+        border-radius: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        transform: translateY(-1px);
+    }
+    
+    .action-btn {
+        min-width: 140px;
+        margin-right: 0.75rem;
+        margin-bottom: 0.75rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .action-btn i {
+        margin-right: 0.5rem;
+    }
+    
+    /* Service-Product specific styles */
+    .service-checkbox, .product-checkbox {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .form-check {
+        min-width: 120px;
+        background-color: var(--primary-light);
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(78, 115, 223, 0.2);
+        transition: all 0.2s ease;
+    }
+    
+    .form-check:hover {
+        background-color: rgba(78, 115, 223, 0.1);
+        transform: translateY(-1px);
+    }
+    
+    .form-check-input {
+        margin-top: 0.25rem;
+    }
+    
+    .form-check-label {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+    
+    .product-section {
+        margin-left: 1rem;
+        margin-top: 1.25rem;
+        padding: 1.25rem;
+        background-color: #f9fafc;
+        border-radius: 0.5rem;
+        border-left: 4px solid var(--primary-color);
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .product-section h6 {
+        color: var(--primary-color);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .product-section h6 i {
+        margin-right: 0.5rem;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .card-header {
+            padding: 1.25rem;
+        }
+        
+        .card-body {
+            padding: 1.25rem;
+        }
+        
+        .form-section {
+            padding: 1.25rem;
+        }
+        
+        .service-checkbox, .product-checkbox {
+            gap: 0.75rem;
+        }
+        
+        .form-check {
+            min-width: 100%;
+        }
+        
+        .action-btn {
+            width: 100%;
+            margin-right: 0;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .card-header h4 {
+            font-size: 1.25rem;
+        }
+        
+        .form-section h5 {
+            font-size: 1.1rem;
+        }
+    }
+    
+    /* Image preview styling */
+    .image-preview-container {
+        margin-top: 1rem;
+    }
+    
+    .image-preview {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        padding: 0.25rem;
+    }
+    
+    .invalid-feedback {
+        display: none;
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .was-validated .form-control:invalid ~ .invalid-feedback,
+    .was-validated .form-control:invalid ~ .invalid-feedback {
+        display: block;
+    }
+</style>
+
+<div class="container py-4">
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Error!</strong> Please correct the following errors:
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field|title }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit Lead - {{ lead.name }}</h4>
+                <span class="badge bg-light text-dark">
+                    <i class="fas fa-id-badge me-1"></i> ID: {{ lead.id }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="id_name" class="form-label">Full Name</label>
+                            {{ form.name|add_class:"form-control" }}
+                            <div class="invalid-feedback">
+                                Please provide a valid name.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_phone" class="form-label">Phone Number</label>
+                            {{ form.phone|add_class:"form-control" }}
+                            <div class="invalid-feedback">
+                                Please provide a valid phone number.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_email" class="form-label">Email Address</label>
+                            {{ form.email|add_class:"form-control" }}
+                            <div class="invalid-feedback">
+                                Please provide a valid email address.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_status" class="form-label">Lead Status</label>
+                            {{ form.status|add_class:"form-select" }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Business Information Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-store me-2"></i>Business Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="id_business_name" class="form-label">Business Name</label>
+                            {{ form.shop_name|add_class:"form-control" }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_business_type" class="form-label">Business Type</label>
+                            {{ form.shop_type|add_class:"form-select" }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_location" class="form-label">Location</label>
+                            {{ form.location|add_class:"form-control" }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_follow_up_date" class="form-label">Follow-up Date</label>
+                            {{ form.follow_up_date|add_class:"form-control" }}
+                            <small class="text-muted">Format: YYYY-MM-DD</small>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="id_image" class="form-label">Lead Image</label>
+                            {{ form.lead_image|add_class:"form-control" }}
+                            {% if lead.image %}
+                                <div class="image-preview-container">
+                                    <p class="mb-1">Current Image:</p>
+                                    <img src="{{ lead.image.url }}" class="image-preview" alt="Current lead image">
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Services & Products Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-cogs me-2"></i>Services & Products</h5>
+                    <div class="mb-4">
+                        <label class="form-label">Select Required Services</label>
+                        <div class="service-checkbox">
+                            {% for service in services %}
+                                <div class="form-check">
+                                    <input type="checkbox" 
+                                           name="services_want" 
+                                           value="{{ service.id }}" 
+                                           id="service_{{ service.id }}"
+                                           class="service-checkbox-input"
+                                           {% if service in lead.services_want.all %}checked{% endif %}>
+                                    <label class="form-check-label" for="service_{{ service.id }}">
+                                        {{ service.name }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    {% for service in services %}
+                        <div id="products-{{ service.id }}" 
+                             class="product-section" 
+                             style="display: {% if service in lead.services_want.all %}block{% else %}none{% endif %}">
+                            <h6>
+                                <i class="fas fa-cube me-2"></i>
+                                {{ service.name }} Products
+                            </h6>
+                            {% for product in service.products.all %}
+    {% with lead_product_map|get_item:product.id as lp %}
+    <div class="form-check mb-3">
+        <input type="checkbox" 
+               name="products_{{ service.id }}" 
+               value="{{ product.id }}" 
+               id="product_{{ product.id }}"
+               {% if product in lead.products_interested.all %}checked{% endif %}>
+        <label class="form-check-label" for="product_{{ product.id }}">
+            {{ product.name }}
+        </label>
+        <div class="d-flex flex-wrap align-items-center mt-2">
+            <div class="me-3">
+                <label>Quantity:</label>
+                <input type="number"
+                    name="quantity_{{ service.id }}_{{ product.id }}"
+                    min="1"
+                    class="form-control form-control-sm d-inline-block"
+                    style="width: 80px;"
+                    value="{{ lp.quantity }}">
+            </div>
+            <div class="me-3">
+                <label>Price:</label>
+                <input type="text"
+                    name="price_{{ service.id }}_{{ product.id }}"
+                    class="form-control form-control-sm d-inline-block"
+                    placeholder="Price"
+                    style="width: 100px;"
+                    value="{{ lp.custom_price }}">
+            </div>
+            <div>
+                <label>Note:</label>
+                <input type="text"
+                        name="note_{{ service.id }}_{{ product.id }}"
+                        class="form-control form-control-sm d-inline-block"
+                        placeholder="Note"
+                        style="width: 200px;"
+                        value="{{ lp.note }}">
+            </div>
+        </div>
+    </div>
+    {% endwith %}
+{% endfor %}
+
+
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Remarks Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-comment-dots me-2"></i>Additional Remarks</h5>
+                    <div class="mb-3">
+                        <label for="id_remarks" class="form-label">Notes & Comments</label>
+                        {{ form.remarks|add_class:"form-control" }}
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-between mt-4 pt-4 border-top">
+                    <div class="d-flex flex-wrap">
+                        <button type="submit" class="btn btn-primary action-btn">
+                            <i class="fas fa-save me-2"></i> Save Changes
+                        </button>
+                        <button type="reset" class="btn btn-outline-secondary action-btn">
+                            <i class="fas fa-undo me-1"></i> Reset
+                        </button>
+                    </div>
+                    <a href="{% url 'view_lead' pk=lead.id username=request.user.username %}" class="btn btn-outline-secondary action-btn">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all service checkboxes
+        const serviceCheckboxes = document.querySelectorAll('.service-checkbox-input');
+
+        // Function to toggle product section visibility
+        function toggleProductSection(serviceId, show) {
+            const productSection = document.getElementById(`products-${serviceId}`);
+            if (productSection) {
+                productSection.style.display = show ? 'block' : 'none';
+            }
+        }
+
+        // Initialize visibility on page load
+        serviceCheckboxes.forEach(checkbox => {
+            const serviceId = checkbox.value;
+            toggleProductSection(serviceId, checkbox.checked);
+            
+            // Set up change event listener
+            checkbox.addEventListener('change', function() {
+                toggleProductSection(serviceId, this.checked);
+            });
+        });
+
+        // Prevent form submission if there are errors
+        const form = document.querySelector('form.needs-validation');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // Scroll to the first error
+                    const firstError = form.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+                form.classList.add('was-validated');
+            }, false);
+        }
+
+        // Animation for form sections
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = "1";
+                    entry.target.style.transform = "translateY(0)";
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.style.opacity = "0";
+            section.style.transform = "translateY(20px)";
+            section.style.transition = "all 0.4s ease-out";
+            observer.observe(section);
+        });
+
+        // Image preview functionality
+        const imageInput = document.querySelector('#id_image');
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        let previewContainer = document.querySelector('.image-preview-container');
+                        if (!previewContainer) {
+                            previewContainer = document.createElement('div');
+                            previewContainer.className = 'image-preview-container mt-2';
+                            imageInput.parentNode.appendChild(previewContainer);
+                        }
+                        
+                        let previewImage = previewContainer.querySelector('.image-preview');
+                        if (!previewImage) {
+                            previewImage = document.createElement('img');
+                            previewImage.className = 'image-preview';
+                            previewContainer.innerHTML = '<p class="mb-1">New Image Preview:</p>';
+                            previewContainer.appendChild(previewImage);
+                        }
+                        
+                        previewImage.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -22,7 +22,7 @@
                         {% endif %}
 
                     </div>
-                    <h5 class="card-title mb-1">{{ employee.name|default:"No Name" }}</h5>
+                    <h5 class="card-title mb-1">{{ employee.user.username }}</h5>
                     <p class="text-muted small mb-2">{{ employee.email|default:"No Email" }}</p>
                     <div class="d-flex justify-content-center">
                         <span class="badge bg-light text-dark">

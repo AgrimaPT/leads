@@ -157,6 +157,23 @@
             </div>
             <form method="post" action="{% url 'add_product' request.user.username %}" enctype="multipart/form-data">
                 {% csrf_token %}
+
+                <!-- Add this inside your addProductModal, after the form opening tag -->
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Error:</strong>
+                    <ul class="mb-0">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Product Name</label>
@@ -188,6 +205,36 @@
                     <button type="submit" class="btn btn-primary">Add Product</button>
                 </div>
             </form>
+
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <strong>Error:</strong>
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <p>{{ field.label }}: {{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if debug %}
+            <div class="debug-info">
+                <h4>Debug Information</h4>
+                <p>Company ID: {{ company.id }}</p>
+                <p>Available Services: 
+                    {% for service in form.fields.service.queryset %}
+                        {{ service.id }}:{{ service.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        No services available
+                    {% endfor %}
+                </p>
+            </div>
+            {% endif %}
+
+            
         </div>
     </div>
 </div>

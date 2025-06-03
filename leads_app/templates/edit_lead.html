@@ -438,6 +438,21 @@
                                             class="form-control form-control-sm d-inline-block ms-2"
                                             style="width: 80px; display: inline;"
                                             value="{% for p in lead.leadproduct_set.all %}{% if p.product_id == product.id %}{{ p.quantity }}{% endif %}{% endfor %}">
+                                        
+
+                                        <input type="text"
+                                            name="price_{{ service.id }}_{{ product.id }}"
+                                            class="form-control form-control-sm d-inline-block ms-2"
+                                            placeholder="Price"
+                                            style="width: 100px; display: inline;"
+                                            value="{% for p in lead.leadproduct_set.all %}{% if p.product_id == product.id %}{{ p.custom_price }}{% endif %}{% endfor %}">
+                                     
+                                        <input type="text"
+                                                name="note_{{ service.id }}_{{ product.id }}"
+                                                class="form-control form-control-sm d-inline-block mt-1"
+                                                placeholder="Note"
+                                                style="width: 200px;"
+                                                value="{% for p in lead.leadproduct_set.all %}{% if p.product_id == product.id %}{{ p.note }}{% endif %}{% endfor %}">
                                     </div>
                                 {% endfor %}
                             </div>

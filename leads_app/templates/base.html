@@ -294,9 +294,11 @@
         <a href="{% url 'company_dashboard' username=user.username %}">
             <i class="bi bi-plus-circle"></i> Leads
         </a>
-        
-        
 
+        <a href="{% url 'company_lead_report' username=user.username %}">
+            <i class="bi bi-graph-up"></i> Report
+        </a>
+        
         <a href="{% url 'service_product_list' username=user.username %}">
             <i class="bi bi-box-seam"></i> Service & Product
         </a>
@@ -311,11 +313,6 @@
                 <i class="bi bi-box-arrow-right"></i> Logout
             </button>
         </form>
-        
-        
-        
-        
-        
         
         <div class="divider"></div>
 

@@ -58,3 +58,8 @@ def get_shop_type_icon(shop_type):
     elif 'online' in shop_type:
         return 'fa-globe'
     return 'fa-store'
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+

@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #4e73df;
+        --secondary-color: #f8f9fc;
+        --accent-color: #2e59d9;
+        --success-color: #1cc88a;
+        --warning-color: #f6c23e;
+        --danger-color: #e74a3b;
+        --info-color: #36b9cc;
+    }
+    
+    .detail-card {
+        background-color: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .detail-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .detail-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+    }
+    
+    .detail-value {
+        font-size: 1.1rem;
+        color: #343a40;
+    }
+    
+    .status-badge {
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+    }
+    
+    .badge-hot {
+        background-color: var(--danger-color);
+        color: white;
+    }
+    
+    .badge-warm {
+        background-color: var(--warning-color);
+        color: #1f2d3d;
+    }
+    
+    .badge-cold {
+        background-color: var(--info-color);
+        color: white;
+    }
+    
+    .badge-closed {
+        background-color: var(--success-color);
+        color: white;
+    }
+    
+    .remarks-box {
+        background-color: #f8f9fa;
+        border-left: 4px solid var(--primary-color);
+        padding: 1rem;
+        border-radius: 0.25rem;
+    }
+    
+    .action-btn {
+        min-width: 120px;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .detail-card {
+            padding: 1rem;
+        }
+        
+        .detail-value {
+            font-size: 1rem;
+        }
+        
+        .action-btn {
+            width: 100%;
+            margin-right: 0;
+        }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--accent-color));">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-user-tag me-2"></i>Lead Details</h4>
+                <span class="badge bg-light text-dark">
+                    <i class="fas fa-id-badge me-1"></i> ID: {{ lead.id }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Main Details Section -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="detail-card">
+                        <h5 class="mb-4 text-primary"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Name</div>
+                            <div class="detail-value">{{ lead.name }}</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Phone</div>
+                            <div class="detail-value">
+                                <a href="tel:{{ lead.phone }}" class="text-decoration-none">
+                                    <i class="fas fa-phone-alt me-2"></i>{{ lead.phone }}
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value">
+                                {% if lead.email %}
+                                    <a href="mailto:{{ lead.email }}" class="text-decoration-none">
+                                        <i class="fas fa-envelope me-2"></i>{{ lead.email }}
+                                    </a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">
+                                {% if lead.status == 'New' %}
+                                    <span class="status-badge bg-primary">New</span>
+                                {% elif lead.status == 'In Progress' %}
+                                    <span class="status-badge bg-warning text-dark">In Progress</span>
+                                {% elif lead.status == 'Completed' %}
+                                    <span class="status-badge bg-success">Completed</span>
+                                {% else %}
+                                    <span class="status-badge bg-secondary">{{ lead.status }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- <div class="detail-item">
+                            <div class="detail-label">Priority</div>
+                            <div class="detail-value">
+                                <span class="status-badge bg-dark">{{ lead.priority }}</span>
+                            </div>
+                        </div> -->
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Date Added</div>
+                            <div class="detail-value">
+                                <i class="far fa-calendar-alt me-2"></i>{{ lead.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="detail-card">
+                        <h5 class="mb-4 text-primary"><i class="fas fa-store me-2"></i>Business Information</h5>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Business Name</div>
+                            <div class="detail-value">{{ lead.shop_name|default:"-" }}</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Business Type</div>
+                            <div class="detail-value">{{ lead.shop_type|default:"-" }}</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                {% if lead.location %}
+                                    {{ lead.location }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Image</div>
+                            <div class="detail-value">
+                                {% if lead.image %}
+                                    <img src="{{ lead.image.url }}" class="img-fluid rounded" style="max-height: 200px;" alt="Lead Image">
+                                {% else %}
+                                    <span class="text-muted">No image uploaded</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Follow-up Date</div>
+                            <div class="detail-value">
+                                {% if lead.follow_up_date %}
+                                    <i class="far fa-calendar-check me-2"></i>
+                                    {% if lead.follow_up_date < today %}
+                                        <span class="text-danger fw-bold">{{ lead.follow_up_date|date:"M d, Y" }}</span>
+                                    {% elif lead.follow_up_date == today %}
+                                        <span class="text-warning fw-bold">{{ lead.follow_up_date|date:"M d, Y" }}</span>
+                                    {% else %}
+                                        {{ lead.follow_up_date|date:"M d, Y" }}
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Services and Products Section -->
+            <div class="detail-card p-4 border rounded shadow-sm bg-light">
+                <h5 class="mb-4 text-primary d-flex align-items-center">
+                    <i class="fas fa-cogs me-2"></i>Services & Products
+                </h5>
+            
+                {% if services_with_products %}
+                    <div class="row">
+                        {% for service in services_with_products %}
+                            <div class="col-md-6 mb-4">
+                                <div class="bg-primary text-white px-3 py-2 rounded d-inline-block mb-2 shadow-sm">
+                                    <i class="fas fa-cube me-2"></i>{{ service.name }}
+                                </div>
+                                {% if service.products|length > 0 %}
+                                    <div class="ps-2">
+                                        {% for product_info in service.products %}
+                                            <div class="border rounded px-3 py-2 mb-2 bg-white shadow-sm">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <i class="fas fa-caret-right me-1 text-secondary"></i>
+                                                        <strong>{{ product_info.product.name }}</strong>
+                                                        <span class="text-dark fw-semibold ms-1">({{ product_info.quantity }})</span>
+                                                    </div>
+                                                    <div class="text-danger fw-bold">
+                                                        ₹{{ product_info.product.price }}
+                                                    </div>
+                                                </div>
+                                                {% if product_info.note %}
+                                                    <div class="text-muted small mt-1">Note: {{ product_info.note }}</div>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="border rounded px-3 py-2 mb-2 bg-white shadow-sm">
+                                        No products selected
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No services selected</p>
+                {% endif %}
+            </div>
+                            
+            <!-- Remarks Section -->
+            <div class="detail-card">
+                <h5 class="mb-4 text-primary"><i class="fas fa-comment-dots me-2"></i>Remarks</h5>
+                <div class="remarks-box">
+                    {% if lead.remarks %}
+                        {{ lead.remarks|linebreaks }}
+                    {% else %}
+                        <p class="text-muted">No remarks added</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="d-flex flex-wrap mt-4">
+                <a href="{% url 'cmpny_edit_lead' username=username pk=lead.pk %}" class="btn btn-warning action-btn">
+                    <i class="fas fa-edit me-1"></i> Edit Lead
+                </a>
+                <a href="{% url 'view_leads' username=request.user.username %}" class="btn btn-secondary action-btn">
+                    <i class="fas fa-arrow-left me-1"></i> Back to List
+                </a>
+                <!-- You can uncomment this if you want delete functionality -->
+                <!-- <button class="btn btn-danger action-btn" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fas fa-trash-alt me-1"></i> Delete
+                </button> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal (uncomment if needed) -->
+<!--
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this lead? This action cannot be undone.</p>
+                <p class="fw-bold">Lead: {{ lead.name }} ({{ lead.business_name|default:"No business name" }})</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{% url 'delete_lead' lead.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-1"></i> Delete Permanently
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+-->
+{% endblock %}

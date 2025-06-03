@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,10 +14,18 @@
             }
         }
 
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+
+
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: #fff;
             color: #000;
+            -webkit-print-color-adjust: exact !important; /* for Safari/Chrome */
+            print-color-adjust: exact !important; /* for modern browsers */
         }
 
         /* .cover-page {
@@ -38,16 +45,38 @@
             object-fit: cover;
         } */
 
-        .cover-page {
+        /* .cover-page {
             width: 100%;
-            height: 1000px; /* Approx. A4 height at 96dpi (~11in) */
+            height: 1000px; 
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
             page-break-after: always;
-            /* position: relative; */
+            
+        } */
+
+        .cover-page {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            /* page-break-after: always; */
+            page-break-inside: avoid;
         }
+
+        .page-break-after {
+            page-break-after: always;
+        }
+
+
+        .termscon {
+            page-break-before: always;
+            page-break-inside: avoid;
+        }
+
 
         .cover-page img {
             width: 100%;
@@ -71,7 +100,13 @@
 
         .table th, .table td {
             vertical-align: middle;
+            border: 1px solid #000 !important;
         }
+
+        .table {
+            border-collapse: collapse !important;
+        }
+
 
         .total-row td {
             font-weight: bold;
@@ -92,22 +127,57 @@
             margin-top: 40px;
         }
 
-        @media print {
+        .table tfoot td,
+        .table tfoot th,
+        .table tfoot tr {
+            border: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+        }
+        
+
+        /* .proposal-overlay {
+            top: 55%; 
+            left: 0;
+            transform: translateY(-50%);
+            padding: 0 20px;
+        } */
+        .proposal-overlay {
+            top: 40%; /* adjust as needed */
+            left: 10%; /* move it to the left */
+            transform: translateY(-50%);
+            padding: 0 20px;
+            text-align: left; /* left-align the text */
+            width: auto;
+            text-transform: uppercase;
+        }
+
+        .proposal-title {
+            font-size: 28px;
+            letter-spacing: 2px;
+        }
+
+        .proposal-location {
+            font-size: 28px;
+            margin-top: 10px;
+        }
+
+        .proposal-date {
+            font-size: 28px;
+            margin-top: 8px;
+        }
+
+
+
+        /* @media print {
             .no-print {
                 display: none !important;
             }
-        }
+        } */
     </style>
 </head>
 <body>
-    <!-- <div class="customization-bar no-print mb-4">
-        <label for="tableFormat" class="form-label">Select Table Format:</label>
-        <select class="form-select w-auto d-inline-block" id="tableFormat" onchange="switchTableFormat(this.value)">
-            <option value="format1">Standard</option>
-            <option value="format2">Compact</option>
-            <option value="format3">Detailed</option>
-        </select>
-    </div> -->
+    
 
     <!-- Toolbar -->
     <div class="customization-bar no-print mb-4 px-3 py-2 bg-light border rounded d-flex align-items-center justify-content-between">
@@ -119,6 +189,9 @@
                 <!-- <option value="format3">Detailed</option> -->
             </select>
         </div>
+
+        
+
         <div class="d-flex gap-2">
             <button class="btn btn-sm btn-outline-primary" onclick="window.print()">
                 <i class="fas fa-print me-1"></i> Print
@@ -137,11 +210,44 @@
     <div class="content">
 
         <!-- Cover Page -->
-        <div class="cover-page">
+        <div class="cover-page" id="coverPage1">
             {% if company.q_coverpage %}
-                    <img src="{{ company.q_coverpage.url }}" alt="Cover page"><br>
-                {% endif %}
+                <img src="{{ company.q_coverpage.url }}" alt="Cover page">
+            {% else %}
+                <p>First Cover Page</p>
+            {% endif %}
         </div>
+
+        
+
+        <!-- Cover Page 2 (Proposal Page) -->
+        <div class="cover-page page-break-after position-relative" id="coverPage2">
+            {% if company.q_proposalpage %}
+                <img src="{{ company.q_proposalpage.url }}" alt="Proposal page">
+            {% else %}
+                <p>Proposal page</p>
+            {% endif %}
+
+            <!-- Overlayed dynamic content -->
+            <div class="proposal-overlay position-absolute text-white">
+
+                <div class="proposal-title fw-bold" style="color: #05d23b;">
+                    {{ services_string|default:"SERVICES" }}
+                </div>
+                <div class="proposal-location" style="color: #00107a;">
+                    {{ lead.shop_name|default:"Shop name" }}<br>
+                    {{ lead.place|default:"City" }}
+                </div>
+                <!-- <div class="proposal-location">
+                    {{ lead.place|default:"City" }}
+                </div> -->
+                <div class="proposal-date" style="color: #05d23b;">
+                    {{ quotation_date|date:"F j, Y" }}
+                </div>
+            </div>
+        </div>
+
+        
 
         <!-- Header -->
         <div class="header">
@@ -161,8 +267,10 @@
                     <strong>{{ lead.name }}</strong><br>
                     {% if lead.company %}{{ lead.company }}<br>{% endif %}
                     {% if lead.address %}{{ lead.address }}<br>{% endif %}
-                    Phone: {{ lead.phone }}<br>
-                    Email: {{ lead.email }}
+                    {% if lead.phone %}{{ lead.phone }}<br>{% endif %}
+                    {% if lead.email %}{{ lead.email }}<br>{% endif %}
+                    <!-- Phone: {{ lead.phone }}<br>
+                    Email: {{ lead.email }} -->
                 </p>
             </div>
             <div class="col-md-6 text-end">
@@ -216,7 +324,7 @@
         </div>
 
         <div class="quotation-table-format d-none" id="format2">
-            <table class="table table-bordered">
+            <table class="table table-bordered" style="border: 1px solid #000; border-collapse: collapse;">
                 <thead class="table-light">
                     <tr>
                         <th>#</th>
@@ -267,43 +375,75 @@
                 </tfoot>
 
             </table>
+        </div>  
+
+        <!-- Terms and Conditions + Signature on a New Page -->
+        <div class="termscon page-break" style="display: block;">
+
+            
+            <div class="payment">
+                <h5 class="mt-5" style="color: #00107a;">Mode of Payment</h5>
+            </div>
+
+            <!-- Full-width Payment Section -->
+            <div class="container-fluid" style="background-color: #a9e6b9;border-radius: 15px;margin-bottom: 100px;">
+                <div class="row">
+                    <div class="col-12" style="padding: 20px 40px;">
+                        <p style="margin: 0; color: black;">
+                            <strong>By Cheque / Online</strong><br>
+                            Account Name: <strong>GetEllaam</strong><br>
+                            Account Number: <strong>12190200011448</strong><br>
+                            IFSC: <strong>FDRL0001219</strong><br>
+                            Bank: <strong>Federal Bank</strong><br>
+                            Branch: <strong>Petta</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="terms">
+                <h6 style="color: #00107a;text-transform: uppercase;">Terms & Conditions:</h6>
+                <ul>
+                    <li>Hardware & Software payment should be made in advance.</li>
+                    <li>GST (18% Extra) Amount is applicable.</li>
+                    <li>Adaptor warranty is three months.</li>
+                    <li>Free service will be provided during the warranty period. T & C Apply.</li>
+                    <li>Field support charges apply for both software and hardware.</li>
+                    <li>Changes beyond scope will incur additional charges.</li>
+                    <li>Software Yearly AMC: Same as the above.</li>
+                    <li>Extra updates/functions may have additional charges.</li>
+                </ul>
+            </div>
+
+            <!-- Signatures -->
+            <div class="row signature">
+                <div class="col-md-6">
+                    <p>Customer Signature</p>
+                    <div class="line"></div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>Authorized Signature</p>
+                    <div class="line ms-auto"></div>
+                </div>
+            </div>
+
+            
         </div>
 
-        <!-- Terms and Conditions -->
-        <div class="terms">
-            <h6>Terms & Conditions:</h6>
-            <ul>
-                <li>Hardware & Software payment should be made in advance.</li>
-                <li>GST (18% Extra) Amount is applicable.</li>
-                <li>Adaptor warranty is three months.</li>
-                <li>Free service will be provided during the warranty period. T & C Apply.</li>
-                <li>Field support charges apply for both software and hardware.</li>
-                <li>Changes beyond scope will incur additional charges.</li>
-                <li>Software Yearly AMC: ₹9500 (Subject to change).</li>
-                <li>Extra updates/functions may have additional charges.</li>
-            </ul>
-        </div>
-
-        <!-- Signatures -->
-        <div class="row signature">
-            <div class="col-md-6">
-                <p>Customer Signature</p>
-                <div class="line"></div>
-            </div>
-            <div class="col-md-6 text-end">
-                <p>Authorized Signature</p>
-                <div class="line ms-auto"></div>
-            </div>
-        </div>
 
         <!-- Footer -->
-        <div class="footer mt-5">
-            <p>Thank you for your business! | &copy; {% now "Y" %} Your Company Name. All rights reserved.</p>
+        <!-- Thank You Page -->
+        <div class="cover-page " style="display: block;">
+
+            {% if company.q_thankyoupage %}
+                <img src="{{ company.q_thankyoupage.url }}" alt="Thank You Page">
+            {% else %}
+                <p>Thank you page</p>
+            {% endif %}
         </div>
 
+
     </div>
-
-
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -318,8 +458,6 @@
             }
         }
 
-        
-
         function downloadPDF() {
             const element = document.querySelector('.content');  // This is the part you want to export
             const opt = {
@@ -327,12 +465,31 @@
                 filename:     'quotation_{{ quotation_number|default:"0000" }}.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2,useCORS: true },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-                // jsPDF:        { unit: 'px', format: 'a4', orientation: 'portrait' }
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+                pagebreak: {
+                    mode: ['css', 'legacy'],
+                    
+                }
+                            
             };
 
             html2pdf().set(opt).from(element).save();
         }
+
+        function loadCustomImage(input, targetId) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const container = document.getElementById(targetId);
+                if (container) {
+                    container.innerHTML = `<img src="${e.target.result}" alt="${targetId}" />`;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
 
     </script>
         

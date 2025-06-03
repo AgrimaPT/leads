@@ -46,6 +46,16 @@ urlpatterns = [
 
     path('<str:username>/profile/', views.employee_profile, name='employee_profile'),
     path('<str:username>/profile/edit/', views.edit_employee_profile, name='edit_employee_profile'),
+
+    path('<str:username>/company-report/', views.company_lead_report, name='company_lead_report'),
+
+    # Example in urls.py
+    path('<str:username>/lead/view/<int:pk>/', views.cmpny_view_lead, name='cmpny_view_lead'),
+    path('<str:username>/lead/edit/<int:pk>/', views.cmpny_edit_lead, name='cmpny_edit_lead'),
+    path('lead/quotation/<int:pk>/', views.cmpny_preview_quotation, name='cmpny_preview_quotation'),
+
+    path('upload-pages/', views.upload_pages, name='upload_pages'),
+
 ]   
 
 

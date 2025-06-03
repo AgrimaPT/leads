@@ -12,40 +12,44 @@ from django import forms
 from .models import Leads, Service, Product
 
 
+from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UsernameField
+from django.core.exceptions import ValidationError
 
-# class LeadForm(forms.ModelForm):
-#     services_want = forms.ModelMultipleChoiceField(
-#         queryset=Service.objects.none(),  # Placeholder for now
-#         widget=forms.CheckboxSelectMultiple,
-#         required=False
-#     )
 
-#     class Meta:
-#         model = Leads
-#         fields = ['name', 'phone', 'email', 'shop_name', 'place', 'location', 'shop_type', 'services_want', 'status', 'follow_up_date', 'remarks']
+class EmployeeSignupForm(forms.Form):
+    username = UsernameField(max_length=150)
+    password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
+    company_code = forms.CharField(max_length=20)
 
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
 
-#         # Set queryset at runtime (this is the fix!)
-#         self.fields['services_want'].queryset = Service.objects.all()
+        if password1 and password2 and password1 != password2:
+            raise ValidationError("Passwords do not match.")
+        return cleaned_data
 
-#         # Dynamically create product fields per service
-#         services = self.fields['services_want'].queryset
-#         for service in services:
-#             self.fields[f'products_{service.id}'] = forms.ModelMultipleChoiceField(
-#                 queryset=Product.objects.filter(service=service),
-#                 widget=forms.CheckboxSelectMultiple,
-#                 required=False,
-#                 label=f'{service.name} Products',
-#                 initial=[]
-#             )
+    def save(self, commit=True):
+        username = self.cleaned_data["username"]
+        password = self.cleaned_data["password1"]
+        company_code = self.cleaned_data["company_code"]
 
-#         # Store services and products mapping (for template use)
-#         self.SERVICE_PRODUCTS = {
-#             service.id: Product.objects.filter(service=service)
-#             for service in services
-#         }
+        user = User.objects.create_user(username=username, password=password)
+
+        try:
+            company = CompanyProfile.objects.get(company_code=company_code)
+        except CompanyProfile.DoesNotExist:
+            raise ValidationError("Invalid company code")
+
+        employee = Employee(user=user, company=company)
+        if commit:
+            employee.save()
+        return employee
+
 
 class CompanySignupForm(forms.ModelForm):
     username = forms.CharField(max_length=150)
@@ -67,112 +71,6 @@ class CompanySignupForm(forms.ModelForm):
 from django import forms
 from .models import Leads, Service, Product
 
-# class LeadForm(forms.ModelForm):
-#     services_want = forms.ModelMultipleChoiceField(
-#         queryset=Service.objects.all(),
-#         widget=forms.CheckboxSelectMultiple,
-#         required=False
-#     )
-
-#     class Meta:
-#         model = Leads
-#         fields = ['name', 'phone', 'email', 'shop_name', 'place', 'location', 'shop_type', 'services_want', 'status', 'follow_up_date', 'remarks']
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-
-#         # Dynamically create product fields based on services
-#         if 'services_want' in self.data:
-#             # If form has been submitted, update the available product fields dynamically
-#             selected_services = self.data.getlist('services_want')  # Get selected service ids from POST data
-#             self.create_product_fields(selected_services)
-#         else:
-#             # If it's a GET request, just initialize the fields for all services
-#             self.create_product_fields()
-
-#     def create_product_fields(self, selected_services=None):
-#         # Create product fields dynamically based on selected services
-#         if selected_services is None:
-#             selected_services = Service.objects.values_list('id', flat=True)
-        
-#         for service in Service.objects.filter(id__in=selected_services):
-#             self.fields[f'products_{service.id}'] = forms.ModelMultipleChoiceField(
-#                 queryset=Product.objects.filter(service=service),
-#                 widget=forms.CheckboxSelectMultiple,
-#                 required=False,
-#                 label=f'{service.name} Products',
-#                 initial=[]  # Avoid pre-selecting products
-#             )
-
-#     def clean(self):
-#         cleaned_data = super().clean()
-
-#         # Validate that products are selected for the services that were chosen
-#         services_want = cleaned_data.get('services_want')
-
-#         for service in services_want:
-#             product_field_name = f'products_{service.id}'
-#             selected_products = cleaned_data.get(product_field_name)
-
-#             if selected_products is None or len(selected_products) == 0:
-#                 self.add_error(product_field_name, f"Please select at least one product for {service.name}")
-
-#         return cleaned_data
-
-
-
-# class LeadForm(forms.ModelForm):
-#     services_want = forms.ModelMultipleChoiceField(
-#         queryset=Service.objects.all(),
-#         widget=forms.CheckboxSelectMultiple,
-#         required=False
-#     )
-
-#     class Meta:
-#         model = Leads
-#         fields = ['name', 'phone', 'email', 'shop_name', 'place', 'location', 'shop_type', 'services_want', 'status', 'follow_up_date', 'remarks']
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-        
-#         # Store initial services for template rendering
-#         self.initial_services = []
-#         if self.instance and self.instance.pk:
-#             self.initial_services = [str(s.id) for s in self.instance.services_want.all()]
-        
-#         # Initialize all product fields
-#         self.create_product_fields()
-        
-#         # Set initial values for product fields
-#         if self.instance and self.instance.pk:
-#             for service in self.instance.services_want.all():
-#                 field_name = f'products_{service.id}'
-#                 if field_name in self.fields:
-#                     self.fields[field_name].initial = self.instance.products_interested.filter(service=service)
-
-#     def create_product_fields(self):
-#         # Create product fields for all services
-#         for service in Service.objects.all():
-#             field_name = f'products_{service.id}'
-#             self.fields[field_name] = forms.ModelMultipleChoiceField(
-#                 queryset=Product.objects.filter(service=service),
-#                 widget=forms.CheckboxSelectMultiple,
-#                 required=False,
-#                 label=f'{service.name} Products'
-#             )
-
-#     def clean(self):
-#         cleaned_data = super().clean()
-#         services_want = cleaned_data.get('services_want', [])
-
-#         for service in services_want:
-#             product_field_name = f'products_{service.id}'
-#             selected_products = cleaned_data.get(product_field_name, [])
-
-#             if not selected_products:
-#                 self.add_error(product_field_name, f"Please select at least one product for {service.name}")
-
-#         return cleaned_data
 
 class LeadForm(forms.ModelForm):
     services_want = forms.ModelMultipleChoiceField(
@@ -187,73 +85,57 @@ class LeadForm(forms.ModelForm):
                  'shop_type','lead_image', 'services_want', 'status', 'follow_up_date', 'remarks']
 
 
-    # def clean_phone(self):
-    #     phone = self.cleaned_data.get('phone')
-    #     if Leads.objects.filter(phone=phone).exists():
-    #         raise forms.ValidationError("A lead with this phone number already exists.")
-    #     return phone
-
+    
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
-        # Get the current instance (if it exists)
+
+        # If editing an existing lead and phone number hasn't changed, allow it
+        if self.instance and self.instance.pk and self.instance.phone == phone:
+            return phone
+
+        if not self.company:
+            raise forms.ValidationError("Company not set for this form.")
+
+        # Filter leads with the same phone number in the same company
+        existing_leads = Leads.objects.filter(phone=phone, user__company=self.company)
+
+        # Exclude the current instance if editing
         if self.instance and self.instance.pk:
-            # If phone number hasn't changed, no need to check
-            if self.instance.phone == phone:
-                return phone
-        # Check if phone number already exists for other leads
-        if Leads.objects.filter(phone=phone).exclude(pk=self.instance.pk if self.instance else None).exists():
-            raise forms.ValidationError("A lead with this phone number already exists.")
+            existing_leads = existing_leads.exclude(pk=self.instance.pk)
+
+        if existing_leads.exists():
+            raise forms.ValidationError("A lead with this phone number already exists in your company.")
+        
         return phone
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-        
-    #     # Store initial services for template
-    #     self.initial_services = []
-    #     if self.instance.pk:
-    #         self.initial_services = [str(s.id) for s in self.instance.services_want.all()]
-    #         # Initialize all product fields
-    #         self.create_product_fields()
-    #         # Set initial values for product fields
-    #         for service in self.instance.services_want.all():
-    #             field_name = f'products_{service.id}'
-    #             if field_name in self.fields:
-    #                 self.fields[field_name].initial = self.instance.products_interested.filter(service=service)
-
-    # def create_product_fields(self):
-    #     # Create product fields for all services that have products
-    #     for service in Service.objects.all():
-    #         products = Product.objects.filter(service=service)
-    #         if products.exists():  # Only create field if service has products
-    #             field_name = f'products_{service.id}'
-    #             self.fields[field_name] = forms.ModelMultipleChoiceField(
-    #                 queryset=products,
-    #                 widget=forms.CheckboxSelectMultiple,
-    #                 required=False,
-    #                 label=f'{service.name} Products'
-    #             )
-
+    
     def __init__(self, *args, **kwargs):
+        self.company = kwargs.pop('company', None)
         super().__init__(*args, **kwargs)
-        
+
+        if self.company:
+            self.fields['services_want'].queryset = Service.objects.filter(company=self.company)
+        else:
+            self.fields['services_want'].queryset = Service.objects.none()
+
         # Store initial services for template
         self.initial_services = []
         if self.instance.pk:
             self.initial_services = [str(s.id) for s in self.instance.services_want.all()]
-            # Initialize product fields for each selected service
-            self.create_product_fields()
-            # Set initial values for product fields
-            for service in self.instance.services_want.all():
-                field_name = f'products_{service.id}'
-                if field_name in self.fields:
-                    # Set the initial products associated with this service
-                    self.fields[field_name].initial = self.instance.products_interested.filter(service=service)
+            self.create_product_fields(initial=True)
+        else:
+            self.create_product_fields(initial=False)
 
-    def create_product_fields(self):
-        # Create product fields for services that have products
-        for service in Service.objects.all():
-            products = Product.objects.filter(service=service)
-            if products.exists():  # Only create field if service has products
+
+    def create_product_fields(self, initial=False):
+        if not self.company:
+            return
+
+        services = Service.objects.filter(company=self.company)
+
+        for service in services:
+            products = Product.objects.filter(service=service, company=self.company)
+            if products.exists():
                 field_name = f'products_{service.id}'
                 self.fields[field_name] = forms.ModelMultipleChoiceField(
                     queryset=products,
@@ -261,13 +143,16 @@ class LeadForm(forms.ModelForm):
                     required=False,
                     label=f'{service.name} Products'
                 )
+                if initial and self.instance.pk:
+                    self.fields[field_name].initial = self.instance.products_interested.filter(service=service)
+
 
 
 
 class CompanyProfileForm(forms.ModelForm):
     class Meta:
         model = CompanyProfile
-        fields = ['company_name', 'logo', 'address', 'email', 'phone', 'website', 'tax_rate','q_coverpage']
+        fields = ['company_name', 'logo', 'address', 'email', 'phone', 'website', 'tax_rate','q_coverpage', 'q_proposalpage', 'q_thankyoupage']
         widgets = {
             'company_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
@@ -283,15 +168,203 @@ class ServiceForm(forms.ModelForm):
         model = Service
         fields = ['name', 'code']
 
+        def __init__(self, *args, **kwargs):
+            self.company = kwargs.pop('company', None)
+            super().__init__(*args, **kwargs)
+        
+        def save(self, commit=True):
+            instance = super().save(commit=False)
+            if self.company:
+                instance.company = self.company
+            if commit:
+                instance.save()
+            return instance
+
+# class ProductForm(forms.ModelForm):
+#     class Meta:
+#         model = Product
+#         fields = ['service', 'name', 'code', 'price','photo']
+    
+#     # def __init__(self, *args, **kwargs):
+#     #     super().__init__(*args, **kwargs)
+#     #     self.fields['price'].required = False
+
+
+#     def __init__(self, *args, **kwargs):
+#         self.company = kwargs.pop('company', None)
+#         super().__init__(*args, **kwargs)
+
+#         self.fields['price'].required = False
+#         if self.company:
+#             self.fields['service'].queryset = Service.objects.filter(company=self.company)
+
+#     def save(self, commit=True):
+#         instance = super().save(commit=False)
+#         if self.company:
+#             instance.company = self.company
+#         if commit:
+#             instance.save()
+#         return instance
+
+
+
+# class ProductForm(forms.ModelForm):
+#     class Meta:
+#         model = Product
+#         fields = ['service', 'name', 'code', 'price', 'photo']
+
+#     def __init__(self, *args, **kwargs):
+#         self.company = kwargs.pop('company', None)
+#         super().__init__(*args, **kwargs)
+#         self.fields['price'].required = False
+
+#         if self.company:
+#             self.fields['service'].queryset = Service.objects.filter(company=self.company)
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         service = cleaned_data.get("service")
+
+#         print("Selected service:", service)
+#         print("Service's company ID:", service.company_id if service else None)
+#         print("Form's company ID:", self.company.id if self.company else None)
+
+#         if self.company and service:
+#             if service.company_id != self.company.id:
+#                 raise forms.ValidationError("The service does not belong to the same company as the product.")
+#         return cleaned_data
+
+# class ProductForm(forms.ModelForm):
+#     class Meta:
+#         model = Product
+#         fields = ['service', 'name', 'code', 'price', 'photo']
+
+#     def __init__(self, *args, **kwargs):
+#         self.company = kwargs.pop('company', None)
+#         super().__init__(*args, **kwargs)
+#         self.fields['price'].required = False
+
+#         # Filter services to only show those belonging to the company
+#         if self.company:
+#             self.fields['service'].queryset = Service.objects.filter(company=self.company)
+#         else:
+#             self.fields['service'].queryset = Service.objects.none()
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         service = cleaned_data.get("service")
+
+#         if self.company and service:
+#             if service.company != self.company:
+#                 raise forms.ValidationError(
+#                     "The selected service doesn't belong to your company. "
+#                     "Please select a service from your company."
+#                 )
+#         return cleaned_data
+
+#     def save(self, commit=True):
+#         product = super().save(commit=False)
+#         if self.company:
+#             product.company = self.company
+#         if commit:
+#             product.save()
+#         return product
+
+
+
+# class ProductForm(forms.ModelForm):
+#     class Meta:
+#         model = Product
+#         fields = ['service', 'name', 'code', 'price', 'photo']
+
+#     def __init__(self, *args, **kwargs):
+#         self.company = kwargs.pop('company', None)
+#         super().__init__(*args, **kwargs)
+        
+#         print(f"Initializing form for company: {self.company.id if self.company else 'None'}")
+        
+#         if self.company:
+#             services = Service.objects.filter(company=self.company)
+#             print(f"Available services for company {self.company.id}: {[s.id for s in services]}")
+#             self.fields['service'].queryset = services
+#         else:
+#             self.fields['service'].queryset = Service.objects.none()
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         service = cleaned_data.get('service')
+        
+#         if self.company and service:
+#             if service.company != self.company:
+#                 print(f"Service {service.id} belongs to company {service.company.id}, but form expects {self.company.id}")
+#                 raise forms.ValidationError(
+#                     "The selected service doesn't belong to your company. "
+#                     f"Service belongs to company ID {service.company.id}, "
+#                     f"your company ID is {self.company.id}"
+#                 )
+#         return cleaned_data
+
+    
+#     def save(self, commit=True):
+#         instance = super().save(commit=False)
+#         if self.company:
+#             instance.company = self.company
+#         if commit:
+#             instance.full_clean()
+#             instance.save()
+#         return instance
+
+# class ProductForm(forms.ModelForm):
+#     class Meta:
+#         model = Product
+#         fields = ['service', 'name', 'code', 'price', 'photo']
+
+#     def __init__(self, *args, **kwargs):
+#         self.company = kwargs.pop('company', None)
+#         super().__init__(*args, **kwargs)
+
+#         if self.company:
+#             self.fields['service'].queryset = Service.objects.filter(company=self.company)
+#         else:
+#             self.fields['service'].queryset = Service.objects.none()
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         if not self.company:
+#             raise forms.ValidationError("Company not specified.")
+        
+#         service = cleaned_data.get('service')
+#         if service and service.company != self.company:
+#             raise forms.ValidationError("The selected service doesn't belong to your company.")
+#         return cleaned_data
+
+#     def save(self, commit=True):
+#         product = super().save(commit=False)
+#         product.company = self.company
+#         if commit:
+#             product.save()
+#         return product
+
+from django import forms
+from .models import Product, Service
+
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['service', 'name', 'code', 'price','photo']
-    
+        fields = ['service', 'name', 'price', 'photo']
+        
     def __init__(self, *args, **kwargs):
+        self.company = kwargs.pop('company', None)
         super().__init__(*args, **kwargs)
-        self.fields['price'].required = False
-
+        if self.company:
+            self.fields['service'].queryset = Service.objects.filter(company=self.company)
+    
+    def save(self, commit=True):
+        product = super().save(commit=False)
+        product.company = self.company
+        if commit:
+            product.save()
+        return product
 class EmployeeProfileForm(forms.ModelForm):
     class Meta:
         model = Employee
