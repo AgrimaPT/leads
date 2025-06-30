@@ -375,7 +375,6 @@ def edit_lead(request, pk,username):
                         custom_price=price,
                         note=note
                     )
-
             messages.success(request, 'Lead updated successfully!')
             return redirect('view_leads', username=request.user.username)
 
@@ -404,11 +403,7 @@ def edit_lead(request, pk,username):
         'services': services
     })
 
-
-
 from django.db.models import Sum
-from decimal import Decimal
-
 from decimal import Decimal
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404
@@ -720,18 +715,15 @@ def edit_company_profile(request,username):
     else:
         form = CompanyProfileForm(instance=company)
 
-    return render(request, 'edit_profile.html', {'form': form})
+    return render(request, 'edit_profile.html', {'form': form,'company': company})
 
 
 def home_selection_view(request):
     return render(request, 'registration/home_selection.html')
 
 
-
 from django.shortcuts import render
 from .models import Leads, Service, Product
-
-
 from django.shortcuts import render
 from django.core import serializers
 from django.http import JsonResponse
@@ -908,24 +900,7 @@ def add_service(request, username):
         form = ServiceForm()
     return redirect('service_product_list', username=username)
 
-# @login_required
-# def add_product(request, username):
-#     if not is_company_user(request, username):
-#         return redirect('home_selection_view')
-    
-#     company = request.user.companyprofile
 
-#     if request.method == 'POST':
-#         form = ProductForm(request.POST, request.FILES, company=company)
-#         if form.is_valid():
-#             product = form.save(commit=False)
-#             product.company = company
-#             product.save()
-#             return redirect('service_product_list', username=username)
-#     else:
-#         form = ProductForm(company=company)
-
-#     return redirect('service_product_list', username=username)  # Use your template
 @login_required
 def add_product(request, username):
     if not is_company_user(request, username):
@@ -1233,13 +1208,78 @@ def company_lead_report(request, username):
 #     return render(request, 'leads/lead_view.html', {'lead': lead})
 
 
-def cmpny_preview_quotation(request, pk):
-    lead = get_object_or_404(Leads, pk=pk)
-    quotation = Quotation.objects.filter(lead=lead).first()
-    return render(request, 'leads/quotation_preview.html', {
+def preview_quotation(request, lead_id,username):
+    lead = get_object_or_404(Leads, id=lead_id)
+    
+    # Check if the request is coming from the company admin
+    if request.user == lead.user.company.user:
+        company_settings = lead.user.company
+        employee = lead.user
+    # Or from an employee
+    elif request.user.username == username:
+        employee = get_object_or_404(Employee, user=request.user)
+        company_settings = employee.company
+        # Verify the lead belongs to this employee
+        if lead.user != employee:
+            return redirect('home_selection_view')
+    else:
+        return redirect('home_selection_view')
+
+    services_with_products = []
+    subtotal = Decimal('0.00')
+
+    # Fetch LeadProduct entries to access product + quantity
+    lead_products = LeadProduct.objects.filter(lead=lead).select_related('product', 'product__service')
+
+    for lp in lead_products:
+        product = lp.product
+        quantity = lp.quantity
+        note=lp.note
+        unit_price = lp.custom_price if lp.custom_price is not None else (product.price or Decimal('0.00'))
+        total_price = unit_price * quantity
+        photo_url = product.photo.url if product.photo else None
+
+        services_with_products.append({
+            'service_name': product.service.name,
+            'product_name': product.name,
+            'note': note,
+            'unit_price': unit_price,
+            'quantity': quantity,
+            'photo': photo_url,
+            'total_price': total_price,
+        })
+
+        subtotal += total_price
+    
+    service_names = lead.services_want.values_list('name', flat=True)
+    services_string = " | ".join(service_names)
+
+
+    # Format current date
+    quotation_date = datetime.now().strftime("%B %d, %Y")  # Ex: March 10, 2025
+
+    tax_rate = Decimal(str(company_settings.tax_rate))
+    tax_amount = subtotal * tax_rate / Decimal('100')
+    total_price = subtotal + tax_amount
+
+    context = {
         'lead': lead,
-        'quotation': quotation,
-    })
+        'services_with_products': services_with_products,
+        'subtotal': subtotal,
+        'tax_rate': float(tax_rate),
+        'tax_amount': tax_amount,
+        'total_price': total_price,
+        'quotation_number': f"{company_settings.company_code}{lead_id}",  # Use company code instead of 'G'
+        'quotation_date': datetime.now(),
+        'company': company_settings,
+        'services_string': services_string,
+        'lead_place': lead.place,
+        'lead_name': lead.shop_name,
+    }
+    return render(request, 'preview_quotation.html', context)
+
+
+
 
 def upload_pages(request):
     if request.method == 'POST':
@@ -1251,16 +1291,6 @@ def upload_pages(request):
     return redirect('quotation_view')
 
 
-# @login_required
-# def view_lead(request, lead_id):
-#     lead = get_object_or_404(Leads, id=lead_id)
-#     return render(request, 'cmpny_view_lead.html', {'lead': lead})
-
-# @login_required
-# def edit_lead(request, lead_id):
-#     lead = get_object_or_404(Leads, id=lead_id)
-#     # Add your form handling logic
-#     return render(request, 'cmpny_edit_lead.html', {'lead': lead})
 
 
 @login_required
@@ -1311,48 +1341,7 @@ def cmpny_view_lead(request, pk, username):
 
     return render(request, 'cmpny_view_lead.html', context)
 
-# @login_required
-# def cmpny_edit_lead(request, username, pk):
-#     if request.user.username != username:
-#         return redirect('home_selection_view')
-
-#     company = get_object_or_404(CompanyProfile, user=request.user)
-#     lead = get_object_or_404(Leads, pk=pk, user__company=company)
-
-#     if request.method == 'POST':
-#         form = LeadForm(request.POST, instance=lead, company=company)  # Pass company here
-
-#         if form.is_valid():
-#             lead = form.save(commit=False)  # Save main lead data but not M2M yet
-#             lead.user = lead.user  # just to be explicit, or set user if you want to update
-#             lead.save()
-
-#             # Save services_want many-to-many field
-#             form.save_m2m()
-
-#             # Now save product interests from dynamic fields
-#             # Clear old product interests for this lead first
-#             lead.products_interested.clear()
-
-#             for service in form.fields['services_want'].queryset:
-#                 product_field_name = f'products_{service.id}'
-#                 if product_field_name in form.cleaned_data:
-#                     products = form.cleaned_data[product_field_name]
-#                     for product in products:
-#                         lead.products_interested.add(product)
-
-#             messages.success(request, 'Lead updated successfully.')
-#             return redirect('cmpny_view_lead', username=username, pk=pk)
-#     else:
-#         form = LeadForm(instance=lead, company=company)  # Pass company here
-
-#     return render(request, 'cmpny_edit_lead.html', {
-#         'form': form,
-#         'lead': lead,
-#         'username': username
-#     })
-
-from decimal import Decimal
+from decimal import Decimal,InvalidOperation
 
 @login_required
 def cmpny_edit_lead(request, username, pk):
@@ -1399,18 +1388,24 @@ def cmpny_edit_lead(request, username, pk):
 
                         note = request.POST.get(f'note_{service.id}_{product.id}') or ''
 
+
+                        try:
+                            custom_price_decimal = Decimal(custom_price) if custom_price else None
+                        except (InvalidOperation, ValueError):
+                            custom_price_decimal = None  # Or handle/log this differently
+
                         # Save LeadProduct
                         LeadProduct.objects.create(
                             lead=lead,
                             product=product,
                             quantity=quantity,
                             # custom_price=custom_price,
-                            custom_price=Decimal(custom_price) if custom_price else None,
+                            custom_price=custom_price_decimal,
                             note=note
                         )
 
-            # Also update many-to-many
-            lead.products_interested.add(product)
+                        # Also update many-to-many
+                        lead.products_interested.add(product)
 
 
             messages.success(request, 'Lead updated successfully.')

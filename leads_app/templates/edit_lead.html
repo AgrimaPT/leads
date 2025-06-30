@@ -153,28 +153,18 @@
         }
         
         /* Service-Product specific styles */
-        .service-checkbox, .product-checkbox {
+        .service-item {
+            margin-bottom: 1rem;
+        }
+        
+        .service-checkbox {
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .form-check {
-            min-width: 120px;
-            background-color: var(--primary-light);
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid rgba(78, 115, 223, 0.2);
-            transition: all 0.2s ease;
-        }
-        
-        .form-check:hover {
-            background-color: rgba(78, 115, 223, 0.1);
-            transform: translateY(-1px);
+            align-items: center;
+            margin-bottom: 0.5rem;
         }
         
         .form-check-input {
-            margin-top: 0.25rem;
+            margin-top: 0;
         }
         
         .form-check-label {
@@ -182,26 +172,38 @@
             color: var(--text-dark);
         }
         
-        .product-section {
-            margin-left: 1rem;
-            margin-top: 1.25rem;
-            padding: 1.25rem;
-            background-color: #f9fafc;
+        .products-under-service {
+            background: #f1f3f5;
+            padding: 1rem;
             border-radius: 0.5rem;
-            border-left: 4px solid var(--primary-color);
-            animation: fadeIn 0.3s ease;
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            display: none;
         }
         
-        .product-section h6 {
-            color: var(--primary-color);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
+        .products-under-service.show {
+            display: block;
+        }
+        
+        .product-item {
             margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #dee2e6;
         }
         
-        .product-section h6 i {
-            margin-right: 0.5rem;
+        .product-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .product-controls {
+            margin-top: 0.5rem;
+        }
+        
+        .product-controls .form-control {
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
         }
         
         @keyframes fadeIn {
@@ -233,14 +235,6 @@
                 padding: 1.25rem;
             }
             
-            .service-checkbox, .product-checkbox {
-                gap: 0.75rem;
-            }
-            
-            .form-check {
-                min-width: 100%;
-            }
-            
             .action-btn {
                 width: 100%;
                 margin-right: 0;
@@ -254,6 +248,10 @@
             
             .form-section h5 {
                 font-size: 1.1rem;
+            }
+            
+            .products-under-service {
+                margin-left: 1rem;
             }
         }
     </style>
@@ -272,7 +270,6 @@
                 </ul>
             </div>
         {% endif %}
-
 
         <div class="card">
             <div class="card-header text-white">
@@ -347,119 +344,75 @@
                         </div>
                     </div>
                     
-                    <!-- <div class="form-section">
-                        <h5><i class="fas fa-cogs me-2"></i>Services & Products</h5>
-                        <div class="mb-4">
-                            <label class="form-label">Select Required Services</label>
-                            <div class="service-checkbox">
-                                {% for service in services %}
-                                    <div class="form-check">
-                                        <input type="checkbox" 
-                                               name="services_want" 
-                                               value="{{ service.id }}" 
-                                               id="service_{{ service.id }}"
-                                               class="service-checkbox-input"
-                                               {% if service.id in lead.services_want.all.values_list|slice:":1" %}checked{% endif %}>
-                                        <label class="form-check-label" for="service_{{ service.id }}">
-                                            {{ service.name }}
-                                        </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        
-                        {% for service in services %}
-                            <div id="products-{{ service.id }}" 
-                                 class="product-section" 
-                                 style="display: {% if service.id in lead.services_want.all.values_list|slice:":1" %}block{% else %}none{% endif %}">
-                                <h6>
-                                    <i class="fas fa-cube me-2"></i>
-                                    {{ service.name }} Products
-                                </h6>
-                                {% for product in service.products.all %}
-                                    <div class="form-check">
-                                        <input type="checkbox" 
-                                               name="products_{{ service.id }}" 
-                                               value="{{ product.id }}" 
-                                               id="product_{{ product.id }}"
-                                               {% if product in lead.products_interested.all %}checked{% endif %}>
-                                        <label class="form-check-label" for="product_{{ product.id }}">
-                                            {{ product.name }}
-                                        </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
-                    </div> -->
-
-
+                    <!-- Services & Products Section -->
                     <div class="form-section">
                         <h5><i class="fas fa-cogs me-2"></i>Services & Products</h5>
                         <div class="mb-4">
                             <label class="form-label">Select Required Services</label>
-                            <div class="service-checkbox">
+                            <div class="service-list">
                                 {% for service in services %}
-                                    <div class="form-check">
-                                        <input type="checkbox" 
-                                               name="services_want" 
-                                               value="{{ service.id }}" 
-                                               id="service_{{ service.id }}"
-                                               class="service-checkbox-input"
-                                               {% if service in lead.services_want.all %}checked{% endif %}>
-                                        <label class="form-check-label" for="service_{{ service.id }}">
-                                            {{ service.name }}
-                                        </label>
+                                    <div class="service-item">
+                                        <div class="service-checkbox">
+                                            <input type="checkbox" 
+                                                   name="services_want" 
+                                                   value="{{ service.id }}" 
+                                                   id="service_{{ service.id }}"
+                                                   class="form-check-input service-checkbox-input"
+                                                   {% if service in lead.services_want.all %}checked{% endif %}>
+                                            <label class="form-check-label ms-2" for="service_{{ service.id }}">
+                                                {{ service.name }}
+                                            </label>
+                                        </div>
+                                        
+                                        <!-- Products under this service -->
+                                        <div class="products-under-service {% if service in lead.services_want.all %}show{% endif %}" 
+                                             id="products-{{ service.id }}">
+                                            <label class="form-label">Products Interested</label>
+                                            {% for product in service.products.all %}
+                                                <div class="product-item">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" 
+                                                               name="products_{{ service.id }}" 
+                                                               value="{{ product.id }}" 
+                                                               id="product_{{ product.id }}"
+                                                               class="form-check-input"
+                                                               {% if product in lead.products_interested.all %}checked{% endif %}>
+                                                        <label class="form-check-label ms-2" for="product_{{ product.id }}">
+                                                            {{ product.name }}
+                                                        </label>
+                                                    </div>
+                                                    <div class="product-controls row g-2 mt-2">
+                                                        <div class="col-md-3 col-6">
+                                                            <input type="number"
+                                                                name="quantity_{{ service.id }}_{{ product.id }}"
+                                                                min="1"
+                                                                class="form-control"
+                                                                placeholder="Qty"
+                                                                value="{% for p in lead.leadproduct_set.all %}{% if p.product_id == product.id %}{{ p.quantity }}{% endif %}{% endfor %}">
+                                                        </div>
+                                                        <div class="col-md-4 col-6">
+                                                            <input type="text"
+                                                                name="price_{{ service.id }}_{{ product.id }}"
+                                                                class="form-control"
+                                                                placeholder="Price"
+                                                                value="{% for p in lead.leadproduct_set.all %}{% if p.product_id == product.id %}{{ p.custom_price }}{% endif %}{% endfor %}">
+                                                        </div>
+                                                        <div class="col-md-5 col-12">
+                                                            <input type="text"
+                                                                    name="note_{{ service.id }}_{{ product.id }}"
+                                                                    class="form-control"
+                                                                    placeholder="Note"
+                                                                    value="{% for p in lead.leadproduct_set.all %}{% if p.product_id == product.id %}{{ p.note }}{% endif %}{% endfor %}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
                                     </div>
                                 {% endfor %}
                             </div>
                         </div>
-                        
-                        {% for service in services %}
-                            <div id="products-{{ service.id }}" 
-                                 class="product-section" 
-                                 style="display: {% if service in lead.services_want.all %}block{% else %}none{% endif %}">
-                                <h6>
-                                    <i class="fas fa-cube me-2"></i>
-                                    {{ service.name }} Products
-                                </h6>
-                                {% for product in service.products.all %}
-                                    <div class="form-check">
-                                        <input type="checkbox" 
-                                               name="products_{{ service.id }}" 
-                                               value="{{ product.id }}" 
-                                               id="product_{{ product.id }}"
-                                               {% if product in lead.products_interested.all %}checked{% endif %}>
-                                        <label class="form-check-label" for="product_{{ product.id }}">
-                                            {{ product.name }}
-                                        </label>
-                                        <input type="number"
-                                            name="quantity_{{ service.id }}_{{ product.id }}"
-                                            min="1"
-                                            class="form-control form-control-sm d-inline-block ms-2"
-                                            style="width: 80px; display: inline;"
-                                            value="{% for p in lead.leadproduct_set.all %}{% if p.product_id == product.id %}{{ p.quantity }}{% endif %}{% endfor %}">
-                                        
-
-                                        <input type="text"
-                                            name="price_{{ service.id }}_{{ product.id }}"
-                                            class="form-control form-control-sm d-inline-block ms-2"
-                                            placeholder="Price"
-                                            style="width: 100px; display: inline;"
-                                            value="{% for p in lead.leadproduct_set.all %}{% if p.product_id == product.id %}{{ p.custom_price }}{% endif %}{% endfor %}">
-                                     
-                                        <input type="text"
-                                                name="note_{{ service.id }}_{{ product.id }}"
-                                                class="form-control form-control-sm d-inline-block mt-1"
-                                                placeholder="Note"
-                                                style="width: 200px;"
-                                                value="{% for p in lead.leadproduct_set.all %}{% if p.product_id == product.id %}{{ p.note }}{% endif %}{% endfor %}">
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
                     </div>
-                    
-                    
                     
                     <!-- Remarks Section -->
                     <div class="form-section">
@@ -488,8 +441,6 @@
             </div>
         </div>
     </div>
-    
-
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -512,152 +463,68 @@
                 });
         })();
 
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all service checkboxes
+            const serviceCheckboxes = document.querySelectorAll('.service-checkbox-input');
 
-
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     // Get all service checkboxes
-        //     const serviceCheckboxes = document.querySelectorAll('.service-checkbox-input');
-
-        //     // Function to toggle product section visibility
-        //     function toggleProductSection(serviceId, show) {
-        //         const productSection = document.getElementById(`products-${serviceId}`);
-        //         if (productSection) {
-        //             productSection.style.display = show ? 'block' : 'none';
-        //         }
-        //     }
-
-        //     // Initialize visibility on page load
-        //     serviceCheckboxes.forEach(checkbox => {
-        //         const serviceId = checkbox.value;
-        //         // Show product section if checkbox is checked
-        //         toggleProductSection(serviceId, checkbox.checked);
-                
-        //         // Set up change event listener
-        //         checkbox.addEventListener('change', function() {
-        //             toggleProductSection(serviceId, this.checked);
-        //         });
-        //     });
-
-        //     // Animation for form sections
-        //     const observerOptions = { threshold: 0.1 };
-        //     const observer = new IntersectionObserver((entries) => {
-        //         entries.forEach(entry => {
-        //             if (entry.isIntersecting) {
-        //                 entry.target.style.opacity = "1";
-        //                 entry.target.style.transform = "translateY(0)";
-        //             }
-        //         });
-        //     }, observerOptions);
-
-        //     document.querySelectorAll('.form-section').forEach(section => {
-        //         section.style.opacity = "0";
-        //         section.style.transform = "translateY(20px)";
-        //         section.style.transition = "all 0.4s ease-out";
-        //         observer.observe(section);
-        //     });
-        // });
-
-//         document.addEventListener('DOMContentLoaded', function() {
-//     // Get all service checkboxes
-//     const serviceCheckboxes = document.querySelectorAll('.service-checkbox-input');
-
-//     // Function to toggle product section visibility
-//     function toggleProductSection(serviceId, show) {
-//         const productSection = document.getElementById(`products-${serviceId}`);
-//         if (productSection) {
-//             productSection.style.display = show ? 'block' : 'none';
-//         }
-//     }
-
-//     // Initialize visibility on page load based on checked state
-//     serviceCheckboxes.forEach(checkbox => {
-//         const serviceId = checkbox.value;
-//         toggleProductSection(serviceId, checkbox.checked);
-        
-//         // Set up change event listener
-//         checkbox.addEventListener('change', function() {
-//             toggleProductSection(serviceId, this.checked);
-//         });
-//     });
-
-//     // Animation for form sections
-//     const observer = new IntersectionObserver((entries) => {
-//         entries.forEach(entry => {
-//             if (entry.isIntersecting) {
-//                 entry.target.style.opacity = "1";
-//                 entry.target.style.transform = "translateY(0)";
-//             }
-//         });
-//     }, { threshold: 0.1 });
-
-//     document.querySelectorAll('.form-section').forEach(section => {
-//         section.style.opacity = "0";
-//         section.style.transform = "translateY(20px)";
-//         section.style.transition = "all 0.4s ease-out";
-//         observer.observe(section);
-//     });
-// });
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Get all service checkboxes
-    const serviceCheckboxes = document.querySelectorAll('.service-checkbox-input');
-
-    // Function to toggle product section visibility
-    function toggleProductSection(serviceId, show) {
-        const productSection = document.getElementById(`products-${serviceId}`);
-        if (productSection) {
-            productSection.style.display = show ? 'block' : 'none';
-        }
-    }
-
-    // Initialize visibility on page load
-    serviceCheckboxes.forEach(checkbox => {
-        const serviceId = checkbox.value;
-        toggleProductSection(serviceId, checkbox.checked);
-        
-        // Set up change event listener
-        checkbox.addEventListener('change', function() {
-            toggleProductSection(serviceId, this.checked);
-        });
-    });
-
-    // Prevent form submission if there are errors
-    const form = document.querySelector('form.needs-validation');
-    if (form) {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-                
-                // Scroll to the first error
-                const firstError = form.querySelector('.is-invalid');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Function to toggle product section visibility
+            function toggleProductSection(serviceId, show) {
+                const productSection = document.getElementById(`products-${serviceId}`);
+                if (productSection) {
+                    if (show) {
+                        productSection.classList.add('show');
+                    } else {
+                        productSection.classList.remove('show');
+                    }
                 }
             }
-            form.classList.add('was-validated');
-        }, false);
-    }
 
-    // Animation for form sections
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = "1";
-                entry.target.style.transform = "translateY(0)";
+            // Initialize visibility on page load
+            serviceCheckboxes.forEach(checkbox => {
+                const serviceId = checkbox.value;
+                toggleProductSection(serviceId, checkbox.checked);
+                
+                // Set up change event listener
+                checkbox.addEventListener('change', function() {
+                    toggleProductSection(serviceId, this.checked);
+                });
+            });
+
+            // Prevent form submission if there are errors
+            const form = document.querySelector('form.needs-validation');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        
+                        // Scroll to the first error
+                        const firstError = form.querySelector('.is-invalid');
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                    form.classList.add('was-validated');
+                }, false);
             }
+
+            // Animation for form sections
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = "1";
+                        entry.target.style.transform = "translateY(0)";
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.style.opacity = "0";
+                section.style.transform = "translateY(20px)";
+                section.style.transition = "all 0.4s ease-out";
+                observer.observe(section);
+            });
         });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.form-section').forEach(section => {
-        section.style.opacity = "0";
-        section.style.transform = "translateY(20px)";
-        section.style.transition = "all 0.4s ease-out";
-        observer.observe(section);
-    });
-});
-
     </script>
 </body>
 </html>

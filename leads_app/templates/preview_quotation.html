@@ -2,183 +2,204 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quotation - {{ lead.name }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* Base Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fff;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            width: 100%;
+        }
+
+        /* Print Specific Styles */
         @media print {
-            .page-break {
-                page-break-before: always;
+            body, html {
+                width: 210mm;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
+            
             .no-print {
                 display: none !important;
             }
-        }
-
-        .page-break {
-            page-break-before: always;
-            break-before: page;
-        }
-
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #fff;
-            color: #000;
-            -webkit-print-color-adjust: exact !important; /* for Safari/Chrome */
-            print-color-adjust: exact !important; /* for modern browsers */
-        }
-
-        /* .cover-page {
-            width: 100vw;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            page-break-after: always;
-        }
-
-        .cover-page img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        } */
-
-        /* .cover-page {
-            width: 100%;
-            height: 1000px; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            page-break-after: always;
             
-        } */
+            .page {
+                width: 210mm;
+                min-height: 297mm;
+                height: 297mm !important;
+                margin: 0 auto;
+                page-break-after: always;
+                overflow: hidden;
+            }
+            
+            .cover-page {
+                width: 210mm;
+                height: 297mm !important;
+                page-break-after: always;
+            }
+            
+            /* CRITICAL FIX - prevents last blank page */
+            /* .page:last-child,
+            .cover-page:last-child {
+                page-break-after: auto !important;
+                height: auto !important;
+                min-height: 0 !important;
+            } */
 
-        .cover-page {
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            .page:last-child,
+            .cover-page:last-child {
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+                height: auto !important;
+                min-height: 0 !important;
+            }
+            
+            /* Ensure images don't overflow */
+            img {
+                max-width: 100% !important;
+                max-height: 297mm !important;
+            }
+
+            .last-page {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+    }
+        }
+
+        /* Page Layout */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            height: auto;
+            margin: 0 auto;
+            position: relative;
             overflow: hidden;
-            /* page-break-after: always; */
-            page-break-inside: avoid;
         }
-
-        .page-break-after {
-            page-break-after: always;
-        }
-
-
-        .termscon {
-            page-break-before: always;
-            page-break-inside: avoid;
-        }
-
-
-        .cover-page img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
 
         .content {
-            padding: 40px;
+            padding: 15mm;
         }
 
-        .header, .footer {
-            text-align: center;
-            margin-bottom: 40px;
+        /* Cover Pages */
+        .cover-page {
+            width: 210mm;
+            height: 297mm;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
         }
 
-        .header img {
-            height: 80px;
+        .cover-page img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .table th, .table td {
-            vertical-align: middle;
-            border: 1px solid #000 !important;
-        }
-
-        .table {
-            border-collapse: collapse !important;
-        }
-
-
-        .total-row td {
-            font-weight: bold;
-        }
-
-        .signature {
-            margin-top: 80px;
-        }
-
-        .signature .line {
-            border-top: 1px solid #000;
-            width: 200px;
-            margin-top: 40px;
-        }
-
-        .terms {
-            font-size: 0.9rem;
-            margin-top: 40px;
-        }
-
-        .table tfoot td,
-        .table tfoot th,
-        .table tfoot tr {
-            border: none !important;
-            border-top: none !important;
-            border-bottom: none !important;
-        }
-        
-
-        /* .proposal-overlay {
-            top: 55%; 
-            left: 0;
-            transform: translateY(-50%);
-            padding: 0 20px;
-        } */
+        /* Proposal Overlay */
         .proposal-overlay {
-            top: 40%; /* adjust as needed */
-            left: 10%; /* move it to the left */
+            position: absolute;
+            top: 50%;
+            left: 10%;
             transform: translateY(-50%);
             padding: 0 20px;
-            text-align: left; /* left-align the text */
+            text-align: left;
             width: auto;
             text-transform: uppercase;
         }
 
         .proposal-title {
-            font-size: 28px;
+            font-size: 24pt;
             letter-spacing: 2px;
         }
 
         .proposal-location {
-            font-size: 28px;
+            font-size: 24pt;
             margin-top: 10px;
         }
 
         .proposal-date {
-            font-size: 28px;
+            font-size: 24pt;
             margin-top: 8px;
         }
 
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
+        .header img {
+            height: 80px;
+            max-width: 100%;
+        }
 
-        /* @media print {
-            .no-print {
-                display: none !important;
-            }
-        } */
+        /* Tables */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .table th, 
+        .table td {
+            padding: 8px;
+            vertical-align: middle;
+            border: 1px solid #000;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+        }
+
+        .total-row td {
+            font-weight: bold;
+        }
+
+        /* Terms and Payment */
+        .terms {
+            font-size: 10pt;
+            margin-top: 20px;
+        }
+
+        .payment-section {
+            background-color: #a9e6b9;
+            border-radius: 5mm;
+            padding: 10mm;
+            margin-bottom: 20px;
+        }
+
+        /* Signatures */
+        .signature {
+            margin-top: 40px;
+        }
+
+        .signature .line {
+            border-top: 1px solid #000;
+            width: 80mm;
+            margin-top: 20px;
+        }
+
+        /* Toolbar */
+        .customization-bar {
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+        }
     </style>
 </head>
 <body>
-    
-
     <!-- Toolbar -->
     <div class="customization-bar no-print mb-4 px-3 py-2 bg-light border rounded d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-3">
@@ -186,51 +207,45 @@
             <select class="form-select form-select-sm w-auto" id="tableFormat" onchange="switchTableFormat(this.value)">
                 <option value="format1">Normal</option>
                 <option value="format2">With Image</option>
-                <!-- <option value="format3">Detailed</option> -->
             </select>
         </div>
 
-        
-
         <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-primary" onclick="window.print()">
-                <i class="fas fa-print me-1"></i> Print
-            </button>
+            <!-- <button class="btn btn-sm btn-outline-primary" onclick="window.print()">
+                Print
+            </button> -->
             <button class="btn btn-sm btn-outline-success" onclick="downloadPDF()">
-                <i class="fas fa-download me-1"></i> Download
+                Download PDF
             </button>
         </div>
     </div>
 
-    
-
-    
-
     <!-- Quotation Content -->
-    <div class="content">
+    <div class="page" id="pdf-content">
 
-        <!-- Cover Page -->
-        <div class="cover-page" id="coverPage1">
+        <!-- Cover Page 1 -->
+        <div class="cover-page avoid-break" id="coverPage1">
             {% if company.q_coverpage %}
                 <img src="{{ company.q_coverpage.url }}" alt="Cover page">
             {% else %}
-                <p>First Cover Page</p>
+                <div style="width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:#f0f0f0;">
+                    <h1>Cover Page</h1>
+                </div>
             {% endif %}
         </div>
 
-        
-
         <!-- Cover Page 2 (Proposal Page) -->
-        <div class="cover-page page-break-after position-relative" id="coverPage2">
+        <div class="cover-page avoid-break" id="coverPage2">
             {% if company.q_proposalpage %}
                 <img src="{{ company.q_proposalpage.url }}" alt="Proposal page">
             {% else %}
-                <p>Proposal page</p>
+                <div style="width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:#f0f0f0;">
+                    <h1>Proposal Page</h1>
+                </div>
             {% endif %}
 
-            <!-- Overlayed dynamic content -->
-            <div class="proposal-overlay position-absolute text-white">
-
+            <!-- Overlay content -->
+            <div class="proposal-overlay">
                 <div class="proposal-title fw-bold" style="color: #05d23b;">
                     {{ services_string|default:"SERVICES" }}
                 </div>
@@ -238,261 +253,257 @@
                     {{ lead.shop_name|default:"Shop name" }}<br>
                     {{ lead.place|default:"City" }}
                 </div>
-                <!-- <div class="proposal-location">
-                    {{ lead.place|default:"City" }}
-                </div> -->
                 <div class="proposal-date" style="color: #05d23b;">
                     {{ quotation_date|date:"F j, Y" }}
                 </div>
             </div>
         </div>
 
-        
+        <!-- Main Content Page -->
+        <div class="page avoid-break">
+            <div class="content">
+                <!-- Header -->
+                <div class="header">
+                    {% if company.logo %}
+                        <img src="{{ company.logo.url }}" alt="Company Logo"><br>
+                    {% endif %}
+                    <strong>{{company.user}}</strong><br>
+                    {{company.address}}<br>
+                    Phone: {{company.phone}} | Email:{{company.email}}  
+                    <!-- Website:{{company.website}} -->
+                </div>
 
-        <!-- Header -->
-        <div class="header">
-            {% if company.logo %}
-                <img src="{{ company.logo.url }}" alt="Company Logo"><br>
-            {% endif %}
-            <strong>{{company.user}}</strong><br>
-            {{company.address}}<br>
-            Phone: {{company.phone}} | Email:{{company.email}} | Website:{{company.website}}
-        </div>
-
-        <!-- Quotation Info -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <h6>Quotation To:</h6>
-                <p>
-                    <strong>{{ lead.name }}</strong><br>
-                    {% if lead.company %}{{ lead.company }}<br>{% endif %}
-                    {% if lead.address %}{{ lead.address }}<br>{% endif %}
-                    {% if lead.phone %}{{ lead.phone }}<br>{% endif %}
-                    {% if lead.email %}{{ lead.email }}<br>{% endif %}
-                    <!-- Phone: {{ lead.phone }}<br>
-                    Email: {{ lead.email }} -->
-                </p>
-            </div>
-            <div class="col-md-6 text-end">
-                <p><strong>Quotation No:</strong> {{ quotation_number|default:"0000" }}<br>
-                <strong>Date:</strong> {{ quotation_date|date:"F j, Y" }}</p>
-            </div>
-        </div>
-
-        <!-- Quotation Table -->
-        <div class="quotation-table-format" id="format1">
-            <table class="table table-bordered">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>PRODUCT</th>
-                        <th>QTY</th>
-                        <th>UNIT PRICE (₹)</th>
-                        <th class="text-end">TOTAL (₹)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in services_with_products %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ item.product_name }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>{{ item.unit_price|floatformat:2 }}</td>
-                        <td class="text-end">{{ item.total_price|floatformat:2 }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center">No items available</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot>
-                    <tr class="total-row">
-                        <td colspan="4" class="text-end">Sub Total</td>
-                        <td class="text-end">₹ {{ subtotal|floatformat:2 }}</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="4" class="text-end">GST ({{ tax_rate }}%)</td>
-                        <td class="text-end">₹ {{ tax_amount|floatformat:2 }}</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="4" class="text-end">Total</td>
-                        <td class="text-end">₹ {{ total_price|floatformat:2 }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-
-        <div class="quotation-table-format d-none" id="format2">
-            <table class="table table-bordered" style="border: 1px solid #000; border-collapse: collapse;">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>PRODUCT</th>
-                        <th>IMAGE</th>
-                        <th>QTY</th>
-                        <th>UNIT PRICE (₹)</th>
-                        <th class="text-end">TOTAL (₹)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in services_with_products %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ item.product_name }}</td>
-                        <!-- <td>{{ item.photo.url|default:"-" }}</td> -->
-                        <td>
-                            {% if item.photo %}
-                                <img src="{{ item.photo }}" alt="Product Image" style="height: 60px; width: auto;">
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        
-                        <td>{{ item.quantity }}</td>
-                        <td>{{ item.unit_price|floatformat:2 }}</td>
-                        <td class="text-end">{{ item.total_price|floatformat:2 }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center">No items available</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot>
-                    <tr class="total-row">
-                        <td colspan="5" class="text-end">Sub Total</td>
-                        <td class="text-end">₹ {{ subtotal|floatformat:2 }}</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="5" class="text-end">GST ({{ tax_rate }}%)</td>
-                        <td class="text-end">₹ {{ tax_amount|floatformat:2 }}</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="5" class="text-end">Total</td>
-                        <td class="text-end">₹ {{ total_price|floatformat:2 }}</td>
-                    </tr>
-                </tfoot>
-
-            </table>
-        </div>  
-
-        <!-- Terms and Conditions + Signature on a New Page -->
-        <div class="termscon page-break" style="display: block;">
-
-            
-            <div class="payment">
-                <h5 class="mt-5" style="color: #00107a;">Mode of Payment</h5>
-            </div>
-
-            <!-- Full-width Payment Section -->
-            <div class="container-fluid" style="background-color: #a9e6b9;border-radius: 15px;margin-bottom: 100px;">
-                <div class="row">
-                    <div class="col-12" style="padding: 20px 40px;">
-                        <p style="margin: 0; color: black;">
-                            <strong>By Cheque / Online</strong><br>
-                            Account Name: <strong>GetEllaam</strong><br>
-                            Account Number: <strong>12190200011448</strong><br>
-                            IFSC: <strong>FDRL0001219</strong><br>
-                            Bank: <strong>Federal Bank</strong><br>
-                            Branch: <strong>Petta</strong>
+                <!-- Quotation Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Quotation To:</h6>
+                        <p>
+                            <strong>{{ lead.name }}</strong><br>
+                            {% if lead.company %}{{ lead.company }}<br>{% endif %}
+                            {% if lead.address %}{{ lead.address }}<br>{% endif %}
+                            {% if lead.phone %}{{ lead.phone }}<br>{% endif %}
+                            {% if lead.email %}{{ lead.email }}<br>{% endif %}
                         </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p><strong>Quotation No:</strong> {{ quotation_number|default:"0000" }}<br>
+                        <strong>Date:</strong> {{ quotation_date|date:"F j, Y" }}</p>
+                    </div>
+                </div>
+
+                <!-- Quotation Table -->
+                <div class="quotation-table-format" id="format1">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:5%">#</th>
+                                <th style="width:45%">PRODUCT</th>
+                                <th style="width:10%">QTY</th>
+                                <th style="width:20%">UNIT PRICE (₹)</th>
+                                <th style="width:20%" class="text-end">TOTAL (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in services_with_products %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.product_name }}
+                                    {% if item.note %}
+                                        <br>
+                                        <small class="text-muted">{{ item.note }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.unit_price|floatformat:2 }}</td>
+                                <td class="text-end">{{ item.total_price|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No items available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="4" class="text-end">Sub Total</td>
+                                <td class="text-end">₹ {{ subtotal|floatformat:2 }}</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="4" class="text-end">GST ({{ tax_rate }}%)</td>
+                                <td class="text-end">₹ {{ tax_amount|floatformat:2 }}</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="4" class="text-end">Total</td>
+                                <td class="text-end">₹ {{ total_price|floatformat:2 }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="quotation-table-format d-none" id="format2">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:5%">#</th>
+                                <th style="width:30%">PRODUCT</th>
+                                <th style="width:20%">IMAGE</th>
+                                <th style="width:10%">QTY</th>
+                                <th style="width:15%">UNIT PRICE (₹)</th>
+                                <th style="width:20%" class="text-end">TOTAL (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in services_with_products %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.product_name }}</td>
+                                <td>
+                                    {% if item.photo %}
+                                        <img src="{{ item.photo }}" alt="Product Image" style="height:20mm;width:auto;max-width:100%;">
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.unit_price|floatformat:2 }}</td>
+                                <td class="text-end">{{ item.total_price|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No items available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="5" class="text-end">Sub Total</td>
+                                <td class="text-end">₹ {{ subtotal|floatformat:2 }}</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="5" class="text-end">GST ({{ tax_rate }}%)</td>
+                                <td class="text-end">₹ {{ tax_amount|floatformat:2 }}</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="5" class="text-end">Total</td>
+                                <td class="text-end">₹ {{ total_price|floatformat:2 }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms and Conditions Page -->
+        <div class="page avoid-break">
+            <div class="content">
+                <div class="payment">
+                    <h5 style="color: #00107a;">Mode of Payment</h5>
+                </div>
+
+                <div class="payment-section">
+                    <p style="margin: 0; color: black;">
+                        <strong>By Cheque / Online</strong><br>
+                        Account Name: <strong>GetEllaam</strong><br>
+                        Account Number: <strong>12190200011448</strong><br>
+                        IFSC: <strong>FDRL0001219</strong><br>
+                        Bank: <strong>Federal Bank</strong><br>
+                        Branch: <strong>Petta</strong>
+                    </p>
+                </div>
+
+                <div class="terms">
+                    <h6 style="color: #00107a;text-transform: uppercase;">Terms & Conditions:</h6>
+                    <ul>
+                        <li>Hardware & Software payment should be made in advance.</li>
+                        <li>GST (18% Extra) Amount is applicable.</li>
+                        <li>Adaptor warranty is three months.</li>
+                        <li>Free service will be provided during the warranty period. T & C Apply.</li>
+                        <li>Field support charges apply for both software and hardware.</li>
+                        <li>Changes beyond scope will incur additional charges.</li>
+                        <li>Software Yearly AMC: Same as the above.</li>
+                        <li>Extra updates/functions may have additional charges.</li>
+                    </ul>
+                </div>
+
+                <div class="row signature">
+                    <div class="col-md-6">
+                        <p>Customer Signature</p>
+                        <div class="line"></div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <p>Authorized Signature</p>
+                        <div class="line ms-auto"></div>
                     </div>
                 </div>
             </div>
-
-            <div class="terms">
-                <h6 style="color: #00107a;text-transform: uppercase;">Terms & Conditions:</h6>
-                <ul>
-                    <li>Hardware & Software payment should be made in advance.</li>
-                    <li>GST (18% Extra) Amount is applicable.</li>
-                    <li>Adaptor warranty is three months.</li>
-                    <li>Free service will be provided during the warranty period. T & C Apply.</li>
-                    <li>Field support charges apply for both software and hardware.</li>
-                    <li>Changes beyond scope will incur additional charges.</li>
-                    <li>Software Yearly AMC: Same as the above.</li>
-                    <li>Extra updates/functions may have additional charges.</li>
-                </ul>
-            </div>
-
-            <!-- Signatures -->
-            <div class="row signature">
-                <div class="col-md-6">
-                    <p>Customer Signature</p>
-                    <div class="line"></div>
-                </div>
-                <div class="col-md-6 text-end">
-                    <p>Authorized Signature</p>
-                    <div class="line ms-auto"></div>
-                </div>
-            </div>
-
-            
         </div>
 
-
-        <!-- Footer -->
-        <!-- Thank You Page -->
-        <div class="cover-page " style="display: block;">
-
+        <!-- Thank You Page - Final Fixed Version -->
+        <!-- <div class="cover-page" style="height: auto; min-height: 0; page-break-after: auto !important;"> -->
+            
+        <!-- Thank You Page - Final Fixed Version -->
+        <div class="cover-page last-page" style="height: auto; min-height: 0;">
             {% if company.q_thankyoupage %}
                 <img src="{{ company.q_thankyoupage.url }}" alt="Thank You Page">
             {% else %}
-                <p>Thank you page</p>
+                <div style="width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:#f0f0f0;">
+                    <h1 style="font-size: 36pt; color: #28a745;">Thank You!</h1>
+                </div>
             {% endif %}
         </div>
-
 
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <script>
+        // Switch between table formats
         function switchTableFormat(selectedId) {
-            const formats = document.querySelectorAll('.quotation-table-format');
-            formats.forEach(el => el.classList.add('d-none'));
-        
-            const selectedFormat = document.getElementById(selectedId);
-            if (selectedFormat) {
-                selectedFormat.classList.remove('d-none');
-            }
+            document.querySelectorAll('.quotation-table-format').forEach(el => {
+                el.classList.add('d-none');
+            });
+            document.getElementById(selectedId).classList.remove('d-none');
         }
 
+        // PDF Download Function
         function downloadPDF() {
-            const element = document.querySelector('.content');  // This is the part you want to export
+            const element = document.getElementById('pdf-content');
+            
+            // Temporarily modify the last page
+            const lastPage = element.querySelector('.cover-page:last-child');
+            if (lastPage) {
+                lastPage.style.pageBreakAfter = 'auto';
+                lastPage.style.height = 'auto';
+                lastPage.style.minHeight = '0';
+            }
+            
             const opt = {
-                margin:       0.2,
-                filename:     'quotation_{{ quotation_number|default:"0000" }}.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2,useCORS: true },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-                pagebreak: {
-                    mode: ['css', 'legacy'],
-                    
+                margin: 0,
+                filename: 'quotation_{{ quotation_number|default:"0000" }}.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    height: element.scrollHeight,
+                    windowHeight: element.scrollHeight
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait',
+                    hotfixes: ["px_scaling"]
                 }
-                            
             };
 
             html2pdf().set(opt).from(element).save();
         }
 
-        function loadCustomImage(input, targetId) {
-            const file = input.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const container = document.getElementById(targetId);
-                if (container) {
-                    container.innerHTML = `<img src="${e.target.result}" alt="${targetId}" />`;
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
-
+        // Initialize default table format
+        document.addEventListener('DOMContentLoaded', function() {
+            switchTableFormat('format1');
+        });
     </script>
-        
-
 </body>
 </html>

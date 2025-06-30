@@ -253,45 +253,47 @@
                                                 <label class="form-check-label" for="product-{{ product.id }}">
                                                     {{ product.name }}
                                                 </label> -->
-                                                <div class="d-flex align-items-center gap-2 mb-2">
-                                                    <input 
-                                                        type="checkbox" 
-                                                        class="form-check-input" 
-                                                        name="products_{{ service.id }}" 
-                                                        value="{{ product.id }}" 
-                                                        id="product-{{ product.id }}"
-                                                    >
-                                                    <label class="form-check-label me-2" for="product-{{ product.id }}">
-                                                        {{ product.name }}
-                                                    </label>
-                                                    <input 
-                                                        type="number" 
-                                                        name="quantity_{{ product.id }}" 
-                                                        class="form-control form-control-sm" 
-                                                        placeholder="Qty" 
-                                                        min="1" 
-                                                        style="width: 80px;"
-                                                    >
-
-
-                                                    <input 
-                                                        type="number" 
-                                                        name="price_{{ product.id }}" 
-                                                        class="form-control form-control-sm" 
-                                                        placeholder="Price" 
-                                                        step="0.01" 
-                                                        style="width: 100px;"
-                                                    >
-
-                                                    <!-- ✅ Note Field -->
-                                                    <input 
-                                                        type="text" 
-                                                        name="note_{{ product.id }}" 
-                                                        class="form-control form-control-sm" 
-                                                        placeholder="Note" 
-                                                        style="width: 200px;"
-                                                    >
+                                                <div class="row gx-2 gy-2 mb-2">
+                                                    <div class="col-12 col-sm-auto d-flex align-items-center">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            class="form-check-input me-2" 
+                                                            name="products_{{ service.id }}" 
+                                                            value="{{ product.id }}" 
+                                                            id="product-{{ product.id }}"
+                                                        >
+                                                        <label class="form-check-label" for="product-{{ product.id }}">
+                                                            {{ product.name }}
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-6 col-sm-2">
+                                                        <input 
+                                                            type="number" 
+                                                            name="quantity_{{ product.id }}" 
+                                                            class="form-control form-control-sm" 
+                                                            placeholder="Qty" 
+                                                            min="1"
+                                                        >
+                                                    </div>
+                                                    <div class="col-6 col-sm-2">
+                                                        <input 
+                                                            type="number" 
+                                                            name="price_{{ product.id }}" 
+                                                            class="form-control form-control-sm" 
+                                                            placeholder="Price" 
+                                                            step="0.01"
+                                                        >
+                                                    </div>
+                                                    <div class="col-12 col-sm-6">
+                                                        <input 
+                                                            type="text" 
+                                                            name="note_{{ product.id }}" 
+                                                            class="form-control form-control-sm" 
+                                                            placeholder="Note"
+                                                        >
+                                                    </div>
                                                 </div>
+                                                
                                                 
                                             </div>
                                         {% endfor %}

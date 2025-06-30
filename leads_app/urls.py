@@ -52,8 +52,7 @@ urlpatterns = [
     # Example in urls.py
     path('<str:username>/lead/view/<int:pk>/', views.cmpny_view_lead, name='cmpny_view_lead'),
     path('<str:username>/lead/edit/<int:pk>/', views.cmpny_edit_lead, name='cmpny_edit_lead'),
-    path('lead/quotation/<int:pk>/', views.cmpny_preview_quotation, name='cmpny_preview_quotation'),
-
+    # path('<str:username>/cmpny_preview-quotation/<int:lead_id>/', views.cmpny_preview_quotation, name='cmpny_preview_quotation'),
     path('upload-pages/', views.upload_pages, name='upload_pages'),
 
 ]   
