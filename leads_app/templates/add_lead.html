@@ -68,7 +68,11 @@
                     </span>
                 </li>
                 <li class="nav-item">
-                    <a href="{% url 'view_leads' username=request.user.username %}" class="btn btn-outline-primary me-2">View Leads</a>
+                    {% if is_company_user %}
+                        <a href="{% url 'company_dashboard' username=request.user.username %}" class="btn btn-outline-primary me-2">Dashboard</a>
+                    {% else %}
+                        <a href="{% url 'view_leads' username=request.user.username %}" class="btn btn-outline-primary me-2">View Leads</a>
+                    {% endif %}
                 </li>
                 <li class="nav-item">
                     <form method="POST" action="{% url 'logout' %}">
@@ -90,15 +94,34 @@
                 <h3 class="text-center mb-4"><i class="fas fa-user-plus me-2"></i>Add New Lead</h3>
 
                 {% if messages %}
-                    <div class="alert alert-success">
-                        {% for message in messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
                             {{ message }}
-                        {% endfor %}
-                    </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
                 {% endif %}
 
                 <form method="post" action="{% url 'add_lead' username=request.user.username %}" novalidate class="needs-validation" enctype="multipart/form-data">
                     {% csrf_token %}
+
+                    <!-- Employee selection for company users -->
+                    {% if is_company_user and employees %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <label for="employee" class="form-label">
+                                Assign to Employee
+                                <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="employee" name="employee" required>
+                                <option value="">Select Employee</option>
+                                {% for emp in employees %}
+                                <option value="{{ emp.id }}">{{ emp.user.get_full_name|default:emp.user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <!-- Input Fields -->
                     <div class="row">
@@ -178,17 +201,17 @@
                         </div>
 
                         <div class="col-12 mb-4">
-                            <label for="id_place" class="form-label">
+                            <label for="id_lead_image" class="form-label">
                                 Photo
                             </label>
                             <div>
-                                {{ form.lead_image }}
+                                <input type="file" name="lead_image" class="form-control" id="id_lead_image">
                             </div>
                         </div>
                     
                         <div class="col-12 mb-4">
                             <label for="id_status" class="form-label">
-                                Status
+                               Lead Status
                             </label>
                             <div>
                                 <select name="status" class="form-control" id="id_status">
@@ -197,7 +220,7 @@
                                     <option value="warm">Warm</option>
                                     <option value="cold">Cold</option>
                                     <option value="closed">Closed</option>
-                                    <option value="closed">Lost</option>
+                                    <option value="lost">Lost</option>
                                 </select>
                             </div>
                         </div>
@@ -243,16 +266,6 @@
                                         <label class="form-label">Products Interested</label>
                                         {% for product in service.products.all %}
                                             <div class="form-check mb-2">
-                                                <!-- <input 
-                                                    type="checkbox" 
-                                                    class="form-check-input" 
-                                                    name="products_{{ service.id }}" 
-                                                    value="{{ product.id }}" 
-                                                    id="product-{{ product.id }}"
-                                                >
-                                                <label class="form-check-label" for="product-{{ product.id }}">
-                                                    {{ product.name }}
-                                                </label> -->
                                                 <div class="row gx-2 gy-2 mb-2">
                                                     <div class="col-12 col-sm-auto d-flex align-items-center">
                                                         <input 
@@ -263,7 +276,7 @@
                                                             id="product-{{ product.id }}"
                                                         >
                                                         <label class="form-check-label" for="product-{{ product.id }}">
-                                                            {{ product.name }}
+                                                            {{ product.name }} - ₹{{ product.price }}
                                                         </label>
                                                     </div>
                                                     <div class="col-6 col-sm-2">
@@ -273,6 +286,7 @@
                                                             class="form-control form-control-sm" 
                                                             placeholder="Qty" 
                                                             min="1"
+                                                            value="1"
                                                         >
                                                     </div>
                                                     <div class="col-6 col-sm-2">
@@ -282,6 +296,7 @@
                                                             class="form-control form-control-sm" 
                                                             placeholder="Price" 
                                                             step="0.01"
+                                                            value="{{ product.price }}"
                                                         >
                                                     </div>
                                                     <div class="col-12 col-sm-6">
@@ -293,12 +308,9 @@
                                                         >
                                                     </div>
                                                 </div>
-                                                
-                                                
                                             </div>
                                         {% endfor %}
                                     </div>
-
                                 </div>
                             {% endfor %}
                         </div>
@@ -309,9 +321,15 @@
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fas fa-plus me-2"></i>Add Lead
                         </button>
-                        <a href="{% url 'view_leads' username=request.user.username %}" class="btn btn-outline-secondary btn-lg">
-                            <i class="fas fa-list me-2"></i>View All Leads
-                        </a>
+                        {% if is_company_user %}
+                            <a href="{% url 'company_dashboard' username=request.user.username %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        {% else %}
+                            <a href="{% url 'view_leads' username=request.user.username %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-list me-2"></i>View All Leads
+                            </a>
+                        {% endif %}
                     </div>
 
                 </form>
@@ -353,6 +371,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     productsDiv.classList.remove('d-none');
                 } else {
                     productsDiv.classList.add('d-none');
+                    // Uncheck all products when service is unchecked
+                    productsDiv.querySelectorAll('input[type="checkbox"]').forEach(productCb => {
+                        productCb.checked = false;
+                    });
                 }
             }
         });
@@ -361,6 +383,26 @@ document.addEventListener('DOMContentLoaded', function () {
         if (checkbox.checked) {
             document.getElementById('products-for-' + checkbox.value).classList.remove('d-none');
         }
+    });
+
+    // Show product details when product is checked
+    document.querySelectorAll('input[name^="products_"]').forEach(productCb => {
+        productCb.addEventListener('change', function() {
+            const productRow = this.closest('.row');
+            const quantityInput = productRow.querySelector('input[name^="quantity_"]');
+            const priceInput = productRow.querySelector('input[name^="price_"]');
+            const noteInput = productRow.querySelector('input[name^="note_"]');
+            
+            if (this.checked) {
+                quantityInput.disabled = false;
+                priceInput.disabled = false;
+                noteInput.disabled = false;
+            } else {
+                quantityInput.disabled = true;
+                priceInput.disabled = true;
+                noteInput.disabled = true;
+            }
+        });
     });
 });
 </script>

@@ -245,17 +245,98 @@ def view_lead(request, pk,username):
 #         form = LeadForm()
     
 #     return render(request, 'add_lead.html', {'form': form,'employee':employee})
+
+
+
+
+
+# @login_required
+# def add_lead(request, username):
+#     if request.user.username != username:
+#         return redirect('home_selection_view')
+
+#     employee = Employee.objects.get(user=request.user)
+#     company = employee.company
+
+#     if request.method == 'POST':
+#         form = LeadForm(request.POST, request.FILES, company=company)
+#         if form.is_valid():
+#             lead = form.save(commit=False)
+#             lead.user = employee
+#             lead.save()
+#             form.save_m2m()
+
+#             # Save selected products with quantity
+#             for service in lead.services_want.all():
+#                 product_field_name = f'products_{service.id}'
+#                 product_ids = request.POST.getlist(product_field_name)
+#                 for pid in product_ids:
+#                     quantity_str = request.POST.get(f'quantity_{pid}', '1')
+
+#                     price_str = request.POST.get(f'price_{pid}', '0')
+#                     note = request.POST.get(f'note_{pid}', '')
+#                     try:
+#                         quantity = int(quantity_str)
+#                         if quantity < 1:
+#                             quantity = 1
+#                     except ValueError:
+#                         quantity = 1
+
+#                     try:
+#                         price = float(price_str)
+#                     except ValueError:
+#                         price = None
+
+#                     product_instance = Product.objects.get(id=pid)
+#                     final_price = price if price is not None else product_instance.price
+#                     LeadProduct.objects.create(lead=lead, product_id=pid, quantity=quantity,custom_price=final_price,
+#                         note=note)
+
+#             messages.success(request, 'Lead added successfully!')
+#             return redirect('add_lead', username=request.user.username)
+#     else:
+#         form = LeadForm(company=company)
+
+#     return render(request, 'add_lead.html', {'form': form, 'employee': employee})
+
+
+
 @login_required
 def add_lead(request, username):
     if request.user.username != username:
         return redirect('home_selection_view')
 
-    employee = Employee.objects.get(user=request.user)
-    company = employee.company
+    # Determine if user is employee or company
+    if hasattr(request.user, 'employee'):
+        employee = request.user.employee
+        company = employee.company
+        is_company_user = False
+    elif hasattr(request.user, 'companyprofile'):
+        company = request.user.companyprofile
+        is_company_user = True
+        # Get employees for company to assign lead
+        employees = Employee.objects.filter(company=company)
+    else:
+        messages.error(request, 'You are not authorized to add leads.')
+        return redirect('home_selection_view')
 
     if request.method == 'POST':
         form = LeadForm(request.POST, request.FILES, company=company)
         if form.is_valid():
+            # For company users, get the selected employee
+            if is_company_user:
+                employee_id = request.POST.get('employee')
+                try:
+                    employee = Employee.objects.get(id=employee_id, company=company)
+                except (Employee.DoesNotExist, ValueError):
+                    messages.error(request, 'Please select a valid employee.')
+                    return render(request, 'add_lead.html', {
+                        'form': form, 
+                        'company': company,
+                        'is_company_user': is_company_user,
+                        'employees': employees
+                    })
+            
             lead = form.save(commit=False)
             lead.user = employee
             lead.save()
@@ -267,9 +348,9 @@ def add_lead(request, username):
                 product_ids = request.POST.getlist(product_field_name)
                 for pid in product_ids:
                     quantity_str = request.POST.get(f'quantity_{pid}', '1')
-
                     price_str = request.POST.get(f'price_{pid}', '0')
                     note = request.POST.get(f'note_{pid}', '')
+                    
                     try:
                         quantity = int(quantity_str)
                         if quantity < 1:
@@ -284,15 +365,39 @@ def add_lead(request, username):
 
                     product_instance = Product.objects.get(id=pid)
                     final_price = price if price is not None else product_instance.price
-                    LeadProduct.objects.create(lead=lead, product_id=pid, quantity=quantity,custom_price=final_price,
-                        note=note)
+                    LeadProduct.objects.create(
+                        lead=lead, 
+                        product_id=pid, 
+                        quantity=quantity,
+                        custom_price=final_price,
+                        note=note
+                    )
 
             messages.success(request, 'Lead added successfully!')
-            return redirect('add_lead', username=request.user.username)
+            
+            # Redirect based on user type
+            if is_company_user:
+                return redirect('company_dashboard', username=username)
+            else:
+                return redirect('add_lead', username=username)
     else:
         form = LeadForm(company=company)
 
-    return render(request, 'add_lead.html', {'form': form, 'employee': employee})
+    context = {
+        'form': form,
+        'is_company_user': is_company_user,
+        'company': company,
+    }
+    
+    # Add employees to context if company user
+    if is_company_user:
+        context['employees'] = employees
+    else:
+        context['employee'] = employee
+
+    return render(request, 'add_lead.html', context)
+
+
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
@@ -546,17 +651,98 @@ from openpyxl.styles import Alignment
 from django.http import HttpResponse
 from .models import Leads
 
+# @login_required
+# def download_leads_excel(request):
+#     wb = openpyxl.Workbook()
+#     ws = wb.active
+#     ws.title = "Leads"
+    
+#     headers = ['Name', 'Phone', 'Email', 'Shop Name', 'Place', 'Location', 'Type', 'Status', 'Follow-up', 'Remarks', 'Service', 'Product']
+#     ws.append(headers)
+
+#     # leads = Leads.objects.all()
+#     leads = Leads.objects.filter(user=request.user.employee)
+#     row_index = 2  # Start from second row because the first row is header
+
+#     for lead in leads:
+#         follow_up = lead.follow_up_date.strftime('%Y-%m-%d') if lead.follow_up_date else 'N/A'
+#         remarks = lead.remarks if lead.remarks else 'N/A'
+
+#         # Build a list of service-product pairs
+#         service_product_pairs = []
+#         for service in lead.services_want.all():
+#             products = lead.products_interested.filter(service=service)
+#             if products.exists():
+#                 for product in products:
+#                     service_product_pairs.append((service.name, product.name))
+#             else:
+#                 # Service with no product
+#                 service_product_pairs.append((service.name, ''))
+
+#         num_rows = len(service_product_pairs)
+#         if num_rows == 0:
+#             service_product_pairs.append(('', ''))
+#             num_rows = 1
+
+#         # Merge lead info cells vertically
+#         for col_index, value in enumerate([
+#             lead.name,
+#             lead.phone,
+#             lead.email,
+#             lead.shop_name,
+#             lead.place,
+#             lead.location,
+#             lead.shop_type,
+#             lead.status,
+#             follow_up,
+#             remarks
+#         ], start=1):
+#             cell = ws.cell(row=row_index, column=col_index, value=value)
+#             if num_rows > 1:
+#                 ws.merge_cells(start_row=row_index, start_column=col_index, end_row=row_index + num_rows - 1, end_column=col_index)
+#                 # Optional: center align merged cells
+#                 cell.alignment = Alignment(vertical='center')
+
+#         # Write service-product pairs
+#         for i, (service_name, product_name) in enumerate(service_product_pairs):
+#             ws.cell(row=row_index + i, column=11, value=service_name)  # Service
+#             ws.cell(row=row_index + i, column=12, value=product_name)  # Product
+
+#         row_index += num_rows
+
+#     # Prepare HTTP response
+#     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+#     response['Content-Disposition'] = 'attachment; filename="leads.xlsx"'
+#     wb.save(response)
+#     return response
+
 @login_required
 def download_leads_excel(request):
+    # Check if user is an employee or company
+    if hasattr(request.user, 'employee'):
+        # Employee download - only their leads
+        employee = request.user.employee
+        leads = Leads.objects.filter(user=employee)
+        filename = f"{employee.user.username}_leads.xlsx"
+    elif hasattr(request.user, 'companyprofile'):
+        # Company admin download - all company leads
+        company = request.user.companyprofile
+        employees = Employee.objects.filter(company=company)
+        leads = Leads.objects.filter(user__in=employees)
+        filename = f"{company.company_name}_leads.xlsx"
+    else:
+        messages.error(request, 'You are not authorized to download leads.')
+        return redirect('home_selection_view')
+    
+    # Create an Excel workbook and sheet
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Leads"
     
+    # Write headers
     headers = ['Name', 'Phone', 'Email', 'Shop Name', 'Place', 'Location', 'Type', 'Status', 'Follow-up', 'Remarks', 'Service', 'Product']
     ws.append(headers)
-
-    # leads = Leads.objects.all()
-    leads = Leads.objects.filter(user=request.user.employee)
+    
     row_index = 2  # Start from second row because the first row is header
 
     for lead in leads:
@@ -607,11 +793,9 @@ def download_leads_excel(request):
 
     # Prepare HTTP response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="leads.xlsx"'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
     wb.save(response)
     return response
-
-
 
 @login_required
 def company_dashboard(request,username):

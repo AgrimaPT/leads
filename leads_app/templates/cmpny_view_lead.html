@@ -149,7 +149,7 @@
                         </div>
                         
                         <div class="detail-item">
-                            <div class="detail-label">Status</div>
+                            <div class="detail-label">Lead Status</div>
                             <div class="detail-value">
                                 {% if lead.status == 'New' %}
                                     <span class="status-badge bg-primary">New</span>
@@ -261,7 +261,7 @@
                                                         <span class="text-dark fw-semibold ms-1">({{ product_info.quantity }})</span>
                                                     </div>
                                                     <div class="text-danger fw-bold">
-                                                        ₹{{ product_info.product.price }}
+                                                        ₹{{ product_info.price }}
                                                     </div>
                                                 </div>
                                                 {% if product_info.note %}
