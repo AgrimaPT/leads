@@ -1,6 +1,6 @@
 # Leads – Lead Management & Sales Follow-up System
 
-Leads is a web-based application designed to help businesses manage customer leads, track follow-ups, monitor lead status and prepare quotations.
+Leads is a web-based application designed to help businesses manage customer leads, track follow-ups, monitor lead status and generate quotations.
 
 ## Features
 
